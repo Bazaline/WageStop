@@ -178,12 +178,14 @@ body {
   position: relative; overflow: hidden;
 }
 .feature-icon { font-size: 1.5rem; flex-shrink: 0; }
+.feature-text { flex: 1; padding-right: 4rem; }
 .feature-text h3 { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.95rem; color: #111111; }
 .feature-text p  { font-size: 0.85rem; color: #555555; }
 .feature-tag {
   position: absolute; top: 0.75rem; right: 0.75rem;
-  font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem;
-  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: 0.65rem; font-weight: 700; padding: 0.2rem 0.4rem;
+  border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 .feature-tag.free { background: #dcfce7; color: #166534; }
 .feature-tag.paid { background: #fef3c7; color: #92400e; }
@@ -441,14 +443,14 @@ select option { background: #2a2a2a; color: #ffffff; }
   border-bottom: 2px solid #ff4500;
 }
 .contact-card {
-  background: #222222; border: 1px solid #333336;
+  background: #ffffff; border: 1px solid #e0e0e0;
   border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem;
   box-shadow: var(--shadow);
 }
-.contact-card h3 { font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; font-size: 0.95rem; }
+.contact-card h3 { font-weight: 700; color: #111111; margin-bottom: 0.5rem; font-size: 0.95rem; }
 .contact-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.contact-item { font-size: 0.875rem; color: #cccccc; }
-.contact-item span { color: #888888; font-size: 0.8rem; display: block; margin-bottom: 0.2rem; }
+.contact-item { font-size: 0.875rem; color: #333333; }
+.contact-item span { color: #666666; font-size: 0.8rem; display: block; margin-bottom: 0.2rem; }
 .contact-item a { color: #ff4500; text-decoration: none; font-weight: 600; }
 .contact-item a:hover { text-decoration: underline; }
 .link-btn {
@@ -465,13 +467,13 @@ select option { background: #2a2a2a; color: #ffffff; }
 }
 .pension-link {
   display: flex; align-items: center; gap: 0.5rem;
-  background: #ffffff; border: 1px solid #cccccc;
+  background: #f5f5f5; border: 1px solid #cccccc;
   border-radius: 8px; padding: 0.75rem;
-  text-decoration: none; color: #111111;
+  text-decoration: none; color: #333333;
   font-size: 0.875rem; font-weight: 600;
   transition: all 0.2s;
 }
-.pension-link:hover {
+.pension-link:hover, .pension-link:focus {
   border-color: #ff4500; color: #ff4500; background: #fff5f0;
 }
 @media (max-width: 768px) {
