@@ -402,16 +402,32 @@ document.getElementById('paid_travel_time').addEventListener('change', function(
   document.getElementById('mw10-block').style.display = this.value === 'no' ? 'block' : 'none';
 });
 
-// Q5c — entering in c. clears a. and b. (both % AND £)
-// c. % and £ are mutually exclusive
-['ee_total_pct','ee_total_gbp'].forEach(function(id) {
-  document.getElementById(id).addEventListener('input', function() {
+// Q5 — full mutual exclusivity both ways
+// Entering in a. or b. clears c. | Entering in c. clears a. and b.
+const abFields = ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp'];
+const cFields  = ['ee_total_pct','ee_total_gbp'];
+
+abFields.forEach(function(id) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
     if (this.value) {
-      ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp'].forEach(function(f) {
-        const el = document.getElementById(f); if(el) el.value = '';
+      cFields.forEach(function(f) {
+        const fe = document.getElementById(f); if (fe) fe.value = '';
       });
+    }
+  });
+});
+
+cFields.forEach(function(id) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
+    if (this.value) {
+      abFields.forEach(function(f) {
+        const fe = document.getElementById(f); if (fe) fe.value = '';
+      });
+      // Also clear the other c. field
       const other = id === 'ee_total_pct' ? 'ee_total_gbp' : 'ee_total_pct';
-      const otherEl = document.getElementById(other); if(otherEl) otherEl.value = '';
+      const otherEl = document.getElementById(other); if (otherEl) otherEl.value = '';
     }
   });
 });
