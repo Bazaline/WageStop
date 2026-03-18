@@ -84,6 +84,10 @@ def questions():
             "unpaid_training":        request.form.get("unpaid_training"),
             "employer_records_hours": request.form.get("employer_records_hours"),
             "own_uniform":            request.form.get("own_uniform"),
+            "own_specialist_clothing": request.form.get("own_specialist_clothing"),
+            "clothing_reimbursed":    request.form.get("clothing_reimbursed"),
+            "own_tools":              request.form.get("own_tools"),
+            "tools_reimbursed":       request.form.get("tools_reimbursed"),
         }
         session["user_answers"] = answers
         return redirect(url_for("questions_summary"))
@@ -107,15 +111,16 @@ def questions_summary():
 def upload():
     if request.method == "POST":
         if "payslip" not in request.files:
-            return render_template("upload.html", error="Please select a file to upload.")
+            return render_template("upload.html", error="Please select a file to upload.", answers=session.get("user_answers", {}))
 
         file = request.files["payslip"]
         if file.filename == "":
-            return render_template("upload.html", error="Please select a file to upload.")
+            return render_template("upload.html", error="Please select a file to upload.", answers=session.get("user_answers", {}))
 
         if not allowed_file(file.filename):
             return render_template("upload.html",
-                                   error="Please upload a PDF, JPG, PNG or other image file.")
+                                   error="Please upload a PDF, JPG, PNG or other image file.",
+                                   answers=session.get("user_answers", {}))
 
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
@@ -129,11 +134,12 @@ def upload():
             session["payslip_filepath"] = filepath
         except Exception as e:
             return render_template("upload.html",
-                                   error=f"We couldn't read your payslip. Please try again. ({str(e)})")
+                                   error=f"We couldn't read your payslip. Please try again. ({str(e)})",
+                                   answers=session.get("user_answers", {}))
 
         return redirect(url_for("review"))
 
-    return render_template("upload.html")
+    return render_template("upload.html", answers=session.get("user_answers", {}))
 
 
 # ---------------------------------------------------------------------------

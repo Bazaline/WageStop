@@ -11,37 +11,67 @@
   {% endif %}
   <form method="POST" enctype="multipart/form-data" id="upload-form">
     <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <div class="upload-icon">📄</div>
-      <h3>Drop your payslip here</h3>
-      <p>or click to browse files</p>
-      <p class="upload-formats">PDF · JPG · PNG · GIF · WEBP</p>
+      <div id="upload-default">
+        <div class="upload-icon">📄</div>
+        <h3>Drop your payslip here</h3>
+        <p>or click to browse files</p>
+        <p class="upload-formats">PDF · JPG · PNG · GIF · WEBP</p>
+      </div>
+      <div id="upload-selected" style="display:none">
+        <div class="upload-icon">✅</div>
+        <h3 id="file-name-display" style="color:#111111;font-size:1rem;word-break:break-all"></h3>
+        <p style="color:#555555;font-size:0.8rem;margin-top:0.4rem">Click to choose a different file</p>
+      </div>
       <input type="file" id="file-input" name="payslip" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff">
     </div>
-    <p id="file-name" style="text-align:center;margin-top:0.75rem;font-size:0.875rem;color:#475569"></p>
+
+    {# Question prompt — shown ABOVE scan button #}
+    {% set has_answers = answers.get('pay_frequency') or answers.get('pension_enrolled') or answers.get('pension_provider') or answers.get('ee_min_pct') or answers.get('ee_total_pct') or answers.get('er_min_pct') %}
+    {% if has_answers %}
+    <div class="question-prompt question-prompt--answered">
+      <div class="question-prompt-icon">✓</div>
+      <div class="question-prompt-text">
+        <a href="{{ url_for('questions') }}">Click here</a> to change or review your answers to our payslip questions — by completing these, we'll check if your payslip reflects your expectations.
+      </div>
+    </div>
+    {% else %}
+    <div class="question-prompt question-prompt--unanswered">
+      <div class="question-prompt-icon">💡</div>
+      <div class="question-prompt-text">
+        If you'd like to answer our payslip questions, you can do so <a href="{{ url_for('questions') }}">from here</a> — by completing these, we'll check if your payslip reflects your expectations.
+      </div>
+    </div>
+    {% endif %}
+
     <div style="margin-top:1.5rem">
-      <button type="submit" class="btn btn-primary btn-full btn-large">Scan My Payslip →</button>
+      <button type="submit" class="btn btn-primary btn-full btn-large">Scan My Payslip</button>
     </div>
   </form>
-  <p class="skip-link" style="margin-top:1.5rem">
-    Haven't answered the questions yet?
-    <a href="{{ url_for('questions') }}">Answer them first</a> for a more personalised result.
-  </p>
 </div>
 {% endblock %}
 {% block scripts %}
 <script>
 const input = document.getElementById('file-input');
-const nameEl = document.getElementById('file-name');
 const zone = document.getElementById('drop-zone');
+const defaultView = document.getElementById('upload-default');
+const selectedView = document.getElementById('upload-selected');
+const nameDisplay = document.getElementById('file-name-display');
+
+function showSelected(filename) {
+  defaultView.style.display = 'none';
+  selectedView.style.display = 'block';
+  nameDisplay.textContent = '📎 ' + filename;
+}
+
 input.addEventListener('change', () => {
-  if (input.files[0]) nameEl.textContent = '📎 ' + input.files[0].name;
+  if (input.files[0]) showSelected(input.files[0].name);
 });
 zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
 zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
 zone.addEventListener('drop', e => {
   e.preventDefault(); zone.classList.remove('dragging');
   input.files = e.dataTransfer.files;
-  if (input.files[0]) nameEl.textContent = '📎 ' + input.files[0].name;
+  if (input.files[0]) showSelected(input.files[0].name);
 });
 </script>
 {% endblock %}

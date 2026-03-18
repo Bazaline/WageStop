@@ -299,6 +299,27 @@ select option { background: #2a2a2a; color: #ffffff; }
 .upload-formats {
   margin-top: 1rem; font-size: 0.75rem; color: #666;
 }
+
+/* --- QUESTION PROMPT ON UPLOAD PAGE --- */
+.question-prompt {
+  display: flex; align-items: flex-start; gap: 1rem;
+  border-radius: var(--radius); padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem; font-size: 1rem; line-height: 1.6;
+  font-weight: 500;
+}
+.question-prompt--unanswered {
+  background: #fff5f0; border: 2px solid #ff4500;
+  color: #111111;
+}
+.question-prompt--answered {
+  background: #f0fff4; border: 2px solid #22c55e;
+  color: #111111;
+}
+.question-prompt-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem; }
+.question-prompt-text { flex: 1; }
+.question-prompt a { color: #ff4500; font-weight: 700; text-decoration: underline; }
+.question-prompt--answered a { color: #16a34a; }
+.question-prompt a:hover { opacity: 0.8; }
 .error-msg {
   background: #2a1010; border: 1px solid #7f1d1d;
   color: #f87171; border-radius: 8px; padding: 0.75rem 1rem;
