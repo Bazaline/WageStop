@@ -1,16 +1,37 @@
 {% extends "base.html" %}
-{% block title %}Wagestop — Is your pay correct?{% endblock %}
+{% block title %}Wagestop — Where your pay matters{% endblock %}
 
 {% block content %}
 
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-text">
-      <p class="hero-eyebrow">Free payslip analysis</p>
-      <h1>Ever wondered if your <em>pay</em> is correct?</h1>
-      <p class="hero-sub">Unsure how your pension is calculated? We're here to help. Wagestop breaks down the figures on your payslip, scans for common errors, and guides you through the next steps if we find any issues.</p>
+      <h1 style="font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;letter-spacing:-2px;line-height:1.05;margin-bottom:0.4rem">WageStop</h1>
+      <p style="font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:600;color:#ff6a33;margin-bottom:2rem;letter-spacing:-0.3px">where your pay matters</p>
+
+      <div class="hero-checklist">
+        <div class="hero-check-item">
+          <span class="hero-check">&#10003;</span>
+          <span>Ever wondered if your payslip is correct?</span>
+        </div>
+        <div class="hero-check-item">
+          <span class="hero-check">&#10003;</span>
+          <span>Unsure of what your tax code means?</span>
+        </div>
+        <div class="hero-check-item">
+          <span class="hero-check">&#10003;</span>
+          <span>Worried your pension contributions aren't right?</span>
+        </div>
+        <div class="hero-check-item">
+          <span class="hero-check">&#10003;</span>
+          <span>Want to know if items on your payslip are being taxed correctly?</span>
+        </div>
+      </div>
+
+      <p class="hero-sub">Wagestop will give you a comprehensive breakdown of everything on your payslip and give you insight into what we find. We'll scan for common errors too and guide you through the next steps if we find any issues.</p>
+
       <div class="hero-actions">
-        <a href="{{ url_for('questions') }}" class="btn btn-primary">Get Started — It's Free</a>
+        <a href="{{ url_for('questions') }}" class="btn btn-primary btn-large">Get Started — It's Free</a>
         <a href="{{ url_for('upload') }}" class="btn btn-ghost">Skip to Upload</a>
       </div>
     </div>
@@ -30,7 +51,7 @@
         </div>
         <div class="mock-divider"></div>
         <div class="mock-net">
-          <span class="mock-label">Net Pay</span><span class="mock-val mock-green">£2,033.56 <span style="color:#4ade80">✓</span></span>
+          <span class="mock-label">Net Pay</span><span class="mock-val mock-green">£2,033.56</span>
         </div>
         <div class="mock-badge mock-badge--ok">✓ All calculations correct</div>
       </div>

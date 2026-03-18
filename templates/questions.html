@@ -129,7 +129,7 @@
       <div id="q6-pct-block" style="display:none">
         <div class="form-group">
           <label>Employer minimum contribution (%)</label>
-          <input type="number" step="0.1" min="0" name="er_min_pct" placeholder="e.g. 3" value="{{ answers.er_min_pct or '' }}">
+          <input type="number" step="0.1" min="0" id="er_min_pct" name="er_min_pct" placeholder="e.g. 3" value="{{ answers.er_min_pct or '' }}">
         </div>
       </div>
     </div>
@@ -149,13 +149,13 @@
       <div id="q7-max-block" style="display:none">
         <div class="form-group">
           <label>Employer's max percentage (%)</label>
-          <input type="number" step="0.1" min="0" name="er_match_max_pct" placeholder="e.g. 5" value="{{ answers.er_match_max_pct or '' }}">
+          <input type="number" step="0.1" min="0" id="er_match_max_pct" name="er_match_max_pct" placeholder="e.g. 5" value="{{ answers.er_match_max_pct or '' }}">
         </div>
       </div>
       <div id="q7-diff-block" style="display:none">
         <div class="form-group">
           <label>Enter the percentage difference between your contribution and your employer's</label>
-          <input type="number" step="0.1" min="0" name="er_match_diff_pct" placeholder="e.g. 2" value="{{ answers.er_match_diff_pct or '' }}">
+          <input type="number" step="0.1" min="0" id="er_match_diff_pct" name="er_match_diff_pct" placeholder="e.g. 2" value="{{ answers.er_match_diff_pct or '' }}">
         </div>
       </div>
     </div>
@@ -175,14 +175,14 @@
       <h3>What is your date of birth?</h3>
       <div class="info-tag">💡 Entering your date of birth will help us check that your hourly pay is right for your age.</div>
       <div class="form-group">
-        <input type="date" name="date_of_birth" value="{{ answers.date_of_birth or '' }}">
+        <input type="date" id="date_of_birth" name="date_of_birth" value="{{ answers.date_of_birth or '' }}">
       </div>
     </div>
 
     <div id="mw-block" style="display:none">
       <div class="question-card">
         <h3>What are your contractual weekly hours?</h3>
-        <div class="form-group"><input type="number" step="0.5" min="0" name="contractual_hours" placeholder="e.g. 37.5" value="{{ answers.contractual_hours or '' }}"></div>
+        <div class="form-group"><input type="number" step="0.5" min="0" id="contractual_hours" name="contractual_hours" placeholder="e.g. 37.5" value="{{ answers.contractual_hours or '' }}"></div>
       </div>
       <div class="question-card">
         <h3>Did you have any time off in the period this payslip covers?</h3>
@@ -198,7 +198,7 @@
         <div id="mw2-days-block" style="{{ 'display:block' if answers.had_time_off == 'yes' else 'display:none' }}">
           <div class="form-group">
             <label>How many days off did you have?</label>
-            <input type="number" step="0.5" min="0" name="days_off" placeholder="e.g. 2" value="{{ answers.days_off or '' }}">
+            <input type="number" step="0.5" min="0" id="days_off" name="days_off" placeholder="e.g. 2" value="{{ answers.days_off or '' }}">
           </div>
         </div>
       </div>
@@ -280,7 +280,7 @@
       <div class="question-card" id="mw10-block" style="display:none">
         <h3>Enter the hours you spent travelling between clients during this payslip period</h3>
         <div class="info-tag">💡 For example, if you are paid on the 30th for work from the 15th of one month to the 14th of the next, enter the travel time between those dates.</div>
-        <div class="form-group"><input type="number" step="0.25" min="0" name="unpaid_travel_hours" placeholder="Hours (e.g. 12.5)" value="{{ answers.unpaid_travel_hours or '' }}"></div>
+        <div class="form-group"><input type="number" step="0.25" min="0" id="unpaid_travel_hours" name="unpaid_travel_hours" placeholder="Hours (e.g. 12.5)" value="{{ answers.unpaid_travel_hours or '' }}"></div>
       </div>
       <div class="question-card">
         <h3>Are your shift times rounded down?</h3>
@@ -500,6 +500,12 @@ cFields.forEach(function(id) {
 
 initVisibility();
 
+// Clear red highlight as soon as user interacts with a field
+document.querySelectorAll('select, input').forEach(function(el) {
+  el.addEventListener('change', function() { this.classList.remove('field-error'); });
+  el.addEventListener('input',  function() { this.classList.remove('field-error'); });
+});
+
 // ---- FORM VALIDATION ----
 function validateAndSubmit() {
   // Clear all previous errors
@@ -508,11 +514,9 @@ function validateAndSubmit() {
   const errors = [];
 
   function markError(id) {
+    errors.push(id); // Always count — even if element not currently visible
     const el = document.getElementById(id);
-    if (el) {
-      el.classList.add('field-error');
-      errors.push(id);
-    }
+    if (el) el.classList.add('field-error');
   }
 
   function val(id) {
@@ -536,12 +540,15 @@ function validateAndSubmit() {
       const hasAB = val('ee_min_pct') || val('ee_min_gbp');
       const hasC  = val('ee_total_pct') || val('ee_total_gbp');
       if (!hasAB && !hasC) {
-        ['ee_min_pct','ee_total_pct'].forEach(id => markError(id));
+        // Highlight ALL contribution fields
+        ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp','ee_total_pct','ee_total_gbp'].forEach(id => markError(id));
       }
     }
 
-    // Q6
+    // Q6 — always required if enrolled
     if (!val('er_matching_type')) markError('er_matching_type');
+
+    // er_min_pct required for BOTH option a AND option b
     if (val('er_matching_type') === 'a' || val('er_matching_type') === 'b') {
       if (!val('er_min_pct')) markError('er_min_pct');
     }
@@ -577,9 +584,11 @@ function validateAndSubmit() {
   }
 
   if (errors.length > 0) {
-    // Scroll to first error field
     const firstEl = document.getElementById(errors[0]);
-    if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (firstEl) {
+      const target = firstEl.closest('.question-card') || firstEl;
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     return; // STOP — do not submit
   }
 
