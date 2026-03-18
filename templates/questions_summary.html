@@ -47,7 +47,7 @@
     {% if answers.er_min_pct %}
     <div class="summary-row"><span>Employer minimum contribution</span><span>{{ answers.er_min_pct }}%</span></div>
     {% endif %}
-    {% if answers.er_match_type and answers.er_match_type not in ('', 'unsure') %}
+    {% if answers.er_match_type and answers.er_match_type not in ('', 'unsure') and answers.er_matching %}
     <div class="summary-row">
       <span>Employer matching</span>
       <span>{{ {'up_to_max':'Matches up to a max %','pct_higher':'Set % higher','pct_lower':'Set % lower'}.get(answers.er_match_type, answers.er_match_type) }}{% if answers.er_match_pct %} ({{ answers.er_match_pct }}%){% endif %}</span>

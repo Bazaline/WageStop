@@ -62,6 +62,7 @@ def questions():
             "ee_total_pct":           request.form.get("ee_total_pct"),
             "ee_total_gbp":           request.form.get("ee_total_gbp"),
             "er_matching_type":       request.form.get("er_matching_type"),
+            "er_matching":            request.form.get("er_matching_type") == "b",
             "er_min_pct":             request.form.get("er_min_pct"),
             "er_match_type":          request.form.get("er_match_type"),
             "er_match_max_pct":       request.form.get("er_match_max_pct"),

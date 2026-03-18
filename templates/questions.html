@@ -67,10 +67,12 @@
     <div class="question-card" id="q5-block" style="display:none">
       <h3>What are your pension contributions?</h3>
       <div class="info-tag">
-        💡 Enter either a. and b., OR c. Entering anything in c. clears a. and b. For c., you can only enter a percentage OR an amount — not both.
+        💡 Enter either a percentage (%) or amount (£) for each answer. Only use (c) to enter your total contribution.<br><br>
+        <strong>Example 1:</strong> Your minimum contribution is 5% and you contribute an extra 2% on top — enter (a) 5% and (b) 2%.<br>
+        <strong>Example 2:</strong> You contribute a total set amount of £125 a month — enter (c) £125.
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">a. My minimum contribution should be:</p>
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#cccccc">a. My minimum contribution should be:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
@@ -82,7 +84,7 @@
         </div>
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin:0.75rem 0;color:#1e293b">b. In addition, I should contribute an extra:</p>
+      <p style="font-size:0.875rem;font-weight:600;margin:0.75rem 0;color:#cccccc">b. In addition, I should contribute an extra:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
@@ -95,12 +97,12 @@
       </div>
 
       <div style="display:flex;align-items:center;gap:1rem;margin:1rem 0">
-        <div style="flex:1;height:1px;background:#e2e8f0"></div>
-        <span style="font-size:0.8rem;color:#94a3b8;font-weight:600">OR</span>
-        <div style="flex:1;height:1px;background:#e2e8f0"></div>
+        <div style="flex:1;height:1px;background:#333336"></div>
+        <span style="font-size:0.8rem;color:#cccccc;font-weight:600">OR</span>
+        <div style="flex:1;height:1px;background:#333336"></div>
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">c. I should contribute a total of:</p>
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#cccccc">c. I should contribute a total of:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
@@ -222,7 +224,7 @@
         </div>
       </div>
       <div class="question-card">
-        <h3>Does your employer require you to come in earlier than your contracted hours?</h3>
+        <h3>Does your employer ever require you to come in earlier than your contracted hours?</h3>
         <div class="info-tag">💡 This could include signing into your computer, getting changed into a uniform, putting on PPE, or carrying out security checks.</div>
         <div class="form-group">
           <select name="early_start">
@@ -254,6 +256,7 @@
       </div>
       <div class="question-card" id="mw8-block" style="display:none">
         <h3>Are you reimbursed for your travel costs?</h3>
+        <div class="info-tag">💡 Excluding travelling to and from home.</div>
         <div class="form-group">
           <select name="travel_reimbursed">
             <option value="" {{ 'selected' if not answers.travel_reimbursed }}>— Select —</option>
@@ -270,6 +273,7 @@
             <option value="" {{ 'selected' if not answers.paid_travel_time }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.paid_travel_time == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.paid_travel_time == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.paid_travel_time == 'unsure' }}>Unsure</option>
           </select>
         </div>
       </div>
@@ -296,6 +300,7 @@
             <option value="" {{ 'selected' if not answers.unpaid_training }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.unpaid_training == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.unpaid_training == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.unpaid_training == 'unsure' }}>Unsure</option>
           </select>
         </div>
       </div>
@@ -306,7 +311,7 @@
             <option value="" {{ 'selected' if not answers.employer_records_hours }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.employer_records_hours == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.employer_records_hours == 'no' }}>No</option>
-            <option value="na" {{ 'selected' if answers.employer_records_hours == 'na' }}>Not applicable — I am not salaried</option>
+            <option value="unsure" {{ 'selected' if answers.employer_records_hours == 'unsure' }}>Unsure</option>
           </select>
         </div>
       </div>
@@ -318,6 +323,53 @@
             <option value="" {{ 'selected' if not answers.own_uniform }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.own_uniform == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.own_uniform == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.own_uniform == 'unsure' }}>Unsure</option>
+          </select>
+        </div>
+      </div>
+      <div class="question-card">
+        <h3>Do you buy your own specialist clothing you need for work?</h3>
+        <div class="info-tag">💡 Select yes even if it does not identify you as having a certain occupation, for example overalls or safety boots.</div>
+        <div class="form-group">
+          <select name="own_specialist_clothing" id="own_specialist_clothing">
+            <option value="" {{ 'selected' if not answers.own_specialist_clothing }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.own_specialist_clothing == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.own_specialist_clothing == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.own_specialist_clothing == 'unsure' }}>Unsure</option>
+          </select>
+        </div>
+      </div>
+      <div class="question-card" id="clothing-reimbursed-block" style="{{ 'display:block' if answers.own_specialist_clothing == 'yes' else 'display:none' }}">
+        <h3>Are you reimbursed for these clothing costs?</h3>
+        <div class="form-group">
+          <select name="clothing_reimbursed">
+            <option value="" {{ 'selected' if not answers.clothing_reimbursed }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.clothing_reimbursed == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.clothing_reimbursed == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.clothing_reimbursed == 'unsure' }}>Unsure</option>
+          </select>
+        </div>
+      </div>
+      <div class="question-card">
+        <h3>Do you buy your own tools you need to do your job?</h3>
+        <div class="info-tag">💡 For example, scissors or an electric drill.</div>
+        <div class="form-group">
+          <select name="own_tools" id="own_tools">
+            <option value="" {{ 'selected' if not answers.own_tools }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.own_tools == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.own_tools == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.own_tools == 'unsure' }}>Unsure</option>
+          </select>
+        </div>
+      </div>
+      <div class="question-card" id="tools-reimbursed-block" style="{{ 'display:block' if answers.own_tools == 'yes' else 'display:none' }}">
+        <h3>Are you reimbursed for your tool purchases?</h3>
+        <div class="form-group">
+          <select name="tools_reimbursed">
+            <option value="" {{ 'selected' if not answers.tools_reimbursed }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.tools_reimbursed == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.tools_reimbursed == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.tools_reimbursed == 'unsure' }}>Unsure</option>
           </select>
         </div>
       </div>
@@ -392,6 +444,12 @@ document.getElementById('is_apprentice').addEventListener('change', function() {
 document.getElementById('had_time_off').addEventListener('change', function() {
   document.getElementById('mw2-days-block').style.display = this.value === 'yes' ? 'block' : 'none';
 });
+document.getElementById('own_specialist_clothing').addEventListener('change', function() {
+  document.getElementById('clothing-reimbursed-block').style.display = this.value === 'yes' ? 'block' : 'none';
+});
+document.getElementById('own_tools').addEventListener('change', function() {
+  document.getElementById('tools-reimbursed-block').style.display = this.value === 'yes' ? 'block' : 'none';
+});
 document.getElementById('travels_clients').addEventListener('change', function() {
   const s = this.value === 'yes';
   document.getElementById('mw8-block').style.display = s ? 'block' : 'none';
@@ -411,9 +469,16 @@ abFields.forEach(function(id) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', function() {
     if (this.value) {
+      // Clear c. fields
       cFields.forEach(function(f) {
         const fe = document.getElementById(f); if (fe) fe.value = '';
       });
+      // Within a. — if % entered, clear £ and vice versa
+      if (id === 'ee_min_pct') { const f = document.getElementById('ee_min_gbp'); if(f) f.value = ''; }
+      if (id === 'ee_min_gbp') { const f = document.getElementById('ee_min_pct'); if(f) f.value = ''; }
+      // Within b. — if % entered, clear £ and vice versa
+      if (id === 'ee_additional_pct') { const f = document.getElementById('ee_additional_gbp'); if(f) f.value = ''; }
+      if (id === 'ee_additional_gbp') { const f = document.getElementById('ee_additional_pct'); if(f) f.value = ''; }
     }
   });
 });
@@ -422,10 +487,11 @@ cFields.forEach(function(id) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', function() {
     if (this.value) {
+      // Clear all a. and b. fields
       abFields.forEach(function(f) {
         const fe = document.getElementById(f); if (fe) fe.value = '';
       });
-      // Also clear the other c. field
+      // Within c. — if % entered, clear £ and vice versa
       const other = id === 'ee_total_pct' ? 'ee_total_gbp' : 'ee_total_pct';
       const otherEl = document.getElementById(other); if (otherEl) otherEl.value = '';
     }
