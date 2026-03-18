@@ -176,19 +176,88 @@
     </div>
   </div>
 
-  {# Remaining flags (non-category-specific) #}
-  {% set other_flags = result.flags | rejectattr('element_code','in',['TAX','NI','PENSION','PENSION_EE','PENSION_ER','FREQUENCY']) | list %}
+  {# Remaining flags (non-category-specific) — exclude sentinel flags #}
+  {% set other_flags = result.flags | rejectattr('element_code','in',['TAX','NI','PENSION','PENSION_EE','PENSION_ER','FREQUENCY','STAT_PAY']) | list %}
   {% set freq_flags = result.flags | selectattr('element_code','equalto','FREQUENCY') | list %}
   {% for flag in freq_flags + other_flags %}
-    <div class="flag-box {{ flag.severity }}" style="margin-bottom:0.75rem">
-      <div class="flag-title">{{ flag.code | replace('_',' ') }}</div>
-      {{ flag.message }}
-    </div>
+    {% if flag.code != 'PARENTAL_PAY_STAGE2_PROMPT' %}
+      <div class="flag-box {{ flag.severity }}" style="margin-bottom:0.75rem">
+        <div class="flag-title">{{ flag.code | replace('_',' ') }}</div>
+        {{ flag.message }}
+      </div>
+    {% endif %}
   {% endfor %}
+
+  {# STAGE 2 — Parental pay follow-up prompt #}
+  {% set parental_flag = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
+  {% if parental_flag %}
+  <div class="result-card" style="border-color: #0d9488">
+    <div class="result-card-header" onclick="toggleCard(this)" style="background:#0d9488">
+      <h3 style="color:white">For a More Accurate Result</h3>
+      <div class="result-status">
+        <span style="color:white;font-size:0.8rem">Optional — enter pre-leave details</span>
+        <span class="chevron" style="color:white">▼</span>
+      </div>
+    </div>
+    <div class="result-card-body">
+      <p style="font-size:0.875rem;color:#475569;margin-bottom:1.5rem">
+        We've detected parental pay on your payslip. Enter your normal salary from a payslip
+        before you went on leave for a more accurate pension check.
+      </p>
+      <form method="POST" action="{{ url_for('stage2_parental') }}">
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.25rem">
+          <div class="form-group">
+            <label>Monthly salary (£)</label>
+            <input type="number" step="0.01" name="salary_monthly" placeholder="e.g. 2500.00">
+          </div>
+          <div class="form-group">
+            <label>Weekly salary (£)</label>
+            <input type="number" step="0.01" name="salary_weekly" placeholder="e.g. 576.92">
+          </div>
+          <div class="form-group">
+            <label>Annual salary (£)</label>
+            <input type="number" step="0.01" name="salary_annual" placeholder="e.g. 30000.00">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+          <div class="form-group">
+            <label>Employee pension shown on old payslip (£)</label>
+            <input type="number" step="0.01" name="pre_leave_ee_pension" placeholder="e.g. 125.00">
+          </div>
+          <div class="form-group">
+            <label>Employer pension shown on old payslip (£)</label>
+            <input type="number" step="0.01" name="pre_leave_er_pension" placeholder="e.g. 75.00">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:1.25rem">
+          <label>Is your pension normally deducted as a salary sacrifice?</label>
+          <select name="is_salary_sacrifice">
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+            <option value="unknown">Don't know (treated as No)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Calculate Expected Employer Contribution</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  {# Stage 2 result — shown after form submission #}
+  {% if stage2_result %}
+  <div class="flag-box {{ 'error' if stage2_result.underpaid else 'info' }}" style="margin-bottom:0.75rem">
+    <div class="flag-title">{{ 'Employer Pension Underpayment Found' if stage2_result.underpaid else 'Employer Pension Check' }}</div>
+    {{ stage2_result.message }}
+  </div>
+  {% endif %}
 
   <div style="text-align:center; margin-top:2.5rem; display:flex; gap:1rem; justify-content:center; flex-wrap:wrap">
     <a href="{{ url_for('upload') }}" class="btn btn-ghost">Scan Another Payslip</a>
-    <a href="{{ url_for('contacts') }}" class="btn btn-navy">Contacts & Links</a>
+    <a href="{{ url_for('contacts') }}" class="btn btn-navy">Contacts &amp; Links</a>
   </div>
 
 </div>

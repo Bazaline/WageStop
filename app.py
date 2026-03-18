@@ -347,6 +347,107 @@ def result_to_dict(result) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# STAGE 2 — PARENTAL PAY PENSION CHECK
+# ---------------------------------------------------------------------------
+
+@app.route("/stage2-parental", methods=["POST"])
+def stage2_parental():
+    from validation.statutory_pay import (
+        stage2_calculate_expected_er, stage2_output_message
+    )
+
+    result = session.get("validation_result", {})
+    payslip_data = session.get("payslip_data", {})
+    frequency = result.get("pay_frequency", "monthly")
+
+    def to_float(val):
+        try:
+            return float(val) if val else None
+        except (TypeError, ValueError):
+            return None
+
+    # Get pre-leave data from form
+    salary_monthly = to_float(request.form.get("salary_monthly"))
+    salary_weekly  = to_float(request.form.get("salary_weekly"))
+    salary_annual  = to_float(request.form.get("salary_annual"))
+    pre_leave_ee   = to_float(request.form.get("pre_leave_ee_pension"))
+    pre_leave_er   = to_float(request.form.get("pre_leave_er_pension"))
+    is_sal_sac     = request.form.get("is_salary_sacrifice", "no")
+
+    # Determine salary and input frequency
+    if salary_monthly:
+        salary = salary_monthly
+        input_freq = "monthly"
+    elif salary_weekly:
+        salary = salary_weekly
+        input_freq = "weekly"
+    elif salary_annual:
+        salary = salary_annual
+        input_freq = "annual"
+    else:
+        session["stage2_result"] = {
+            "message": "Please enter your salary from a payslip before you went on leave.",
+            "underpaid": False,
+        }
+        return redirect(url_for("results"))
+
+    if not pre_leave_ee or not pre_leave_er:
+        session["stage2_result"] = {
+            "message": "Please enter both your employee and employer pension amounts.",
+            "underpaid": False,
+        }
+        return redirect(url_for("results"))
+
+    is_salary_sacrifice = is_sal_sac == "yes"
+
+    # Get other pensionable pay from current payslip (non-stat pay)
+    other_pensionable = 0.0
+    for line in payslip_data.get("confirmed_lines",
+                                  payslip_data.get("all_lines", [])):
+        code = line.get("element_code", "")
+        amount = float(line.get("amount", 0))
+        if amount > 0 and code not in (
+            "A16","A17","A18","A16_OR_A17",
+            "C1","C2","C3","C4","C5","D1","D2","D3","E1","E3","B1","B2","B5"
+        ):
+            other_pensionable += amount
+
+    # Calculate expected Er
+    expected_er, basis, _ = stage2_calculate_expected_er(
+        pre_leave_salary=salary,
+        pre_leave_salary_frequency=input_freq,
+        pre_leave_ee_pension=pre_leave_ee,
+        pre_leave_er_pension=pre_leave_er,
+        other_pensionable_on_payslip=other_pensionable,
+        is_salary_sacrifice=is_salary_sacrifice,
+        payslip_frequency=frequency,
+    )
+
+    # Compare to Er shown on current payslip
+    er_shown = result.get("pension", {}).get("er_true", 0) or 0
+    underpaid = er_shown < (expected_er - 0.10)
+
+    if underpaid:
+        message = stage2_output_message(expected_er, frequency)
+    else:
+        message = (
+            f"Based on your pre-leave salary, we estimate your employer's pension "
+            f"contribution should be £{expected_er:.2f} a "
+            f"{'month' if frequency == 'monthly' else 'week'}. "
+            f"Your payslip shows £{er_shown:.2f} — this appears correct."
+        )
+
+    session["stage2_result"] = {
+        "message": message,
+        "underpaid": underpaid,
+        "expected_er": expected_er,
+        "basis": basis,
+    }
+
+    return redirect(url_for("results"))
+
+
+# ---------------------------------------------------------------------------
 # RESULTS
 # ---------------------------------------------------------------------------
 
@@ -357,11 +458,13 @@ def results():
 
     result = session["validation_result"]
     payslip_data = session.get("payslip_data", {})
+    stage2_result = session.pop("stage2_result", None)
 
     return render_template(
         "results.html",
         result=result,
         payslip_data=payslip_data,
+        stage2_result=stage2_result,
     )
 
 
