@@ -9,97 +9,88 @@
 <div class="questions-wrap">
   <form method="POST" id="questions-form">
 
-    {# Q1 — Pay frequency #}
     <div class="question-card">
-      <h3>Question 1 — How often are you paid?</h3>
+      <h3>How often are you paid?</h3>
       <div class="form-group">
         <select name="pay_frequency" id="pay_frequency">
-          <option value="unsure">— Select —</option>
-          <option value="monthly">Monthly</option>
-          <option value="weekly">Weekly</option>
-          <option value="unsure">Unsure</option>
+          <option value="unsure" {{ 'selected' if not answers.pay_frequency }}>— Select —</option>
+          <option value="monthly" {{ 'selected' if answers.pay_frequency == 'monthly' }}>Monthly</option>
+          <option value="weekly" {{ 'selected' if answers.pay_frequency == 'weekly' }}>Weekly</option>
+          <option value="unsure" {{ 'selected' if answers.pay_frequency == 'unsure' }}>Unsure</option>
         </select>
       </div>
     </div>
 
-    {# Q2 — Pension enrolled #}
     <div class="question-card">
-      <h3>Question 2 — Are you enrolled in your workplace pension scheme?</h3>
+      <h3>Are you enrolled in your workplace pension scheme?</h3>
       <div class="form-group">
         <select name="pension_enrolled" id="pension_enrolled">
-          <option value="">— Select —</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-          <option value="unsure">Unsure</option>
+          <option value="" {{ 'selected' if not answers.pension_enrolled }}>— Select —</option>
+          <option value="yes" {{ 'selected' if answers.pension_enrolled == 'yes' }}>Yes</option>
+          <option value="no" {{ 'selected' if answers.pension_enrolled == 'no' }}>No</option>
+          <option value="unsure" {{ 'selected' if answers.pension_enrolled == 'unsure' }}>Unsure</option>
         </select>
       </div>
     </div>
 
-    {# Q3 — Pension provider (only if Q2 = yes) #}
     <div class="question-card" id="q3-block" style="display:none">
-      <h3>Question 3 — Who is your pension provider?</h3>
+      <h3>Who is your pension provider?</h3>
       <div class="form-group">
-        <select name="pension_provider" id="pension_provider">
-          <option value="unsure">Unsure</option>
-          <option value="Cushon">Cushon</option>
-          <option value="Nest">Nest</option>
-          <option value="The People's Pension">The People's Pension</option>
-          <option value="Royal London">Royal London</option>
-          <option value="Aviva">Aviva</option>
-          <option value="Aegon">Aegon</option>
-          <option value="True Potential">True Potential</option>
-          <option value="Smart Pensions">Smart Pensions</option>
-          <option value="Now Pensions">Now Pensions</option>
-          <option value="other">Other</option>
+        <select name="pension_provider">
+          <option value="unsure" {{ 'selected' if not answers.pension_provider }}>Unsure</option>
+          <option value="Cushon" {{ 'selected' if answers.pension_provider == 'Cushon' }}>Cushon</option>
+          <option value="Nest" {{ 'selected' if answers.pension_provider == 'Nest' }}>Nest</option>
+          <option value="The People's Pension" {{ 'selected' if answers.pension_provider == "The People's Pension" }}>The People's Pension</option>
+          <option value="Royal London" {{ 'selected' if answers.pension_provider == 'Royal London' }}>Royal London</option>
+          <option value="Aviva" {{ 'selected' if answers.pension_provider == 'Aviva' }}>Aviva</option>
+          <option value="Aegon" {{ 'selected' if answers.pension_provider == 'Aegon' }}>Aegon</option>
+          <option value="True Potential" {{ 'selected' if answers.pension_provider == 'True Potential' }}>True Potential</option>
+          <option value="Smart Pensions" {{ 'selected' if answers.pension_provider == 'Smart Pensions' }}>Smart Pensions</option>
+          <option value="Now Pensions" {{ 'selected' if answers.pension_provider == 'Now Pensions' }}>Now Pensions</option>
+          <option value="other" {{ 'selected' if answers.pension_provider == 'other' }}>Other</option>
         </select>
       </div>
     </div>
 
-    {# Q4 — Knows minimum contribution (only if Q2 = yes) #}
     <div class="question-card" id="q4-block" style="display:none">
-      <h3>Question 4 — Do you know what your minimum pension contribution should be?</h3>
+      <h3>Do you know what your minimum pension contribution should be?</h3>
       <div class="form-group">
         <select name="knows_min_contribution" id="knows_min_contribution">
-          <option value="">— Select —</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-          <option value="unsure">Unsure</option>
+          <option value="" {{ 'selected' if not answers.knows_min_contribution }}>— Select —</option>
+          <option value="yes" {{ 'selected' if answers.knows_min_contribution == 'yes' }}>Yes</option>
+          <option value="no" {{ 'selected' if answers.knows_min_contribution == 'no' }}>No</option>
+          <option value="unsure" {{ 'selected' if answers.knows_min_contribution == 'unsure' }}>Unsure</option>
         </select>
       </div>
     </div>
 
-    {# Q5 — Employee contribution (only if Q4 = yes) #}
     <div class="question-card" id="q5-block" style="display:none">
-      <h3>Question 5 — What are your pension contributions?</h3>
+      <h3>What are your pension contributions?</h3>
       <div class="info-tag">
-        💡 Enter either a. and b., OR c. — entering a total in c. will clear a. and b.
+        💡 Enter either a. and b., OR c. Entering anything in c. clears a. and b. For c., you can only enter a percentage OR an amount — not both.
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">
-        a. My minimum contribution should be:
-      </p>
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">a. My minimum contribution should be:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
-          <input type="number" step="0.1" min="0" name="ee_min_pct" id="ee_min_pct" placeholder="e.g. 5">
+          <input type="number" step="0.1" min="0" name="ee_min_pct" id="ee_min_pct" placeholder="e.g. 5" value="{{ answers.ee_min_pct or '' }}">
         </div>
         <div class="form-group">
           <label>Or amount each payday (£)</label>
-          <input type="number" step="0.01" min="0" name="ee_min_gbp" id="ee_min_gbp" placeholder="e.g. 125.00">
+          <input type="number" step="0.01" min="0" name="ee_min_gbp" id="ee_min_gbp" placeholder="e.g. 125.00" value="{{ answers.ee_min_gbp or '' }}">
         </div>
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin:0.75rem 0;color:#1e293b">
-        b. In addition, I should contribute an extra:
-      </p>
+      <p style="font-size:0.875rem;font-weight:600;margin:0.75rem 0;color:#1e293b">b. In addition, I should contribute an extra:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
-          <input type="number" step="0.1" min="0" name="ee_additional_pct" id="ee_additional_pct" placeholder="e.g. 2">
+          <input type="number" step="0.1" min="0" name="ee_additional_pct" id="ee_additional_pct" placeholder="e.g. 2" value="{{ answers.ee_additional_pct or '' }}">
         </div>
         <div class="form-group">
           <label>Or amount each payday (£)</label>
-          <input type="number" step="0.01" min="0" name="ee_additional_gbp" id="ee_additional_gbp" placeholder="e.g. 50.00">
+          <input type="number" step="0.01" min="0" name="ee_additional_gbp" id="ee_additional_gbp" placeholder="e.g. 50.00" value="{{ answers.ee_additional_gbp or '' }}">
         </div>
       </div>
 
@@ -109,250 +100,231 @@
         <div style="flex:1;height:1px;background:#e2e8f0"></div>
       </div>
 
-      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">
-        c. I should contribute a total of:
-      </p>
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">c. I should contribute a total of:</p>
       <div class="inline-pair">
         <div class="form-group">
           <label>Percentage (%)</label>
-          <input type="number" step="0.1" min="0" name="ee_total_pct" id="ee_total_pct" placeholder="e.g. 7">
+          <input type="number" step="0.1" min="0" name="ee_total_pct" id="ee_total_pct" placeholder="e.g. 7" value="{{ answers.ee_total_pct or '' }}">
         </div>
         <div class="form-group">
           <label>Or amount each payday (£)</label>
-          <input type="number" step="0.01" min="0" name="ee_total_gbp" id="ee_total_gbp" placeholder="e.g. 175.00">
+          <input type="number" step="0.01" min="0" name="ee_total_gbp" id="ee_total_gbp" placeholder="e.g. 175.00" value="{{ answers.ee_total_gbp or '' }}">
         </div>
       </div>
     </div>
 
-    {# Q6 — Employer contribution (only if Q2 = yes) #}
     <div class="question-card" id="q6-block" style="display:none">
-      <h3>Question 6 — Do you know what your employer's minimum pension contribution should be?</h3>
+      <h3>Do you know what your employer's minimum pension contribution should be?</h3>
       <div class="form-group">
         <select name="er_matching_type" id="er_matching_type">
-          <option value="">— Select —</option>
-          <option value="a">Yes, my employer's minimum contribution should be _____%</option>
-          <option value="b">Yes, my employer's minimum is _____% and they match my contribution</option>
-          <option value="c">No</option>
-          <option value="d">Unsure</option>
+          <option value="" {{ 'selected' if not answers.er_matching_type }}>— Select —</option>
+          <option value="a" {{ 'selected' if answers.er_matching_type == 'a' }}>Yes</option>
+          <option value="b" {{ 'selected' if answers.er_matching_type == 'b' }}>Yes, and my employer matches my contribution in some way (See next question)</option>
+          <option value="c" {{ 'selected' if answers.er_matching_type == 'c' }}>No</option>
+          <option value="d" {{ 'selected' if answers.er_matching_type == 'd' }}>Unsure</option>
         </select>
       </div>
       <div id="q6-pct-block" style="display:none">
         <div class="form-group">
           <label>Employer minimum contribution (%)</label>
-          <input type="number" step="0.1" min="0" name="er_min_pct" id="er_min_pct" placeholder="e.g. 3">
+          <input type="number" step="0.1" min="0" name="er_min_pct" placeholder="e.g. 3" value="{{ answers.er_min_pct or '' }}">
         </div>
       </div>
     </div>
 
-    {# Q7 — Employer matching (only if Q6 = b) #}
     <div class="question-card" id="q7-block" style="display:none">
-      <h3>Question 7 — How does your employer match your contribution?</h3>
+      <h3>How does your employer match your contribution?</h3>
       <div class="form-group">
         <select name="er_match_type" id="er_match_type">
-          <option value="">— Select —</option>
-          <option value="up_to_max">Matched up to a max of _____%</option>
-          <option value="pct_higher">Should be _____% higher than my contribution</option>
-          <option value="pct_lower">Should be _____% lower than my contribution</option>
-          <option value="unsure">Unsure</option>
+          <option value="" {{ 'selected' if not answers.er_match_type }}>— Select —</option>
+          <option value="full_match" {{ 'selected' if answers.er_match_type == 'full_match' }}>Matches my contribution with no cap</option>
+          <option value="up_to_max" {{ 'selected' if answers.er_match_type == 'up_to_max' }}>Matches my contribution up to a set percentage (entry required)</option>
+          <option value="pct_above" {{ 'selected' if answers.er_match_type == 'pct_above' }}>Matches a set percentage above my contribution (enter set %)</option>
+          <option value="pct_below" {{ 'selected' if answers.er_match_type == 'pct_below' }}>Matches a set percentage below my contribution</option>
+          <option value="unsure" {{ 'selected' if answers.er_match_type == 'unsure' }}>Unsure</option>
         </select>
       </div>
-      <div id="q7-pct-block" style="display:none">
+      <div id="q7-max-block" style="display:none">
         <div class="form-group">
-          <label>Percentage (%)</label>
-          <input type="number" step="0.1" min="0" name="er_match_pct" id="er_match_pct" placeholder="e.g. 5">
+          <label>Employer's max percentage (%)</label>
+          <input type="number" step="0.1" min="0" name="er_match_max_pct" placeholder="e.g. 5" value="{{ answers.er_match_max_pct or '' }}">
+        </div>
+      </div>
+      <div id="q7-diff-block" style="display:none">
+        <div class="form-group">
+          <label>Enter the percentage difference between your contribution and your employer's</label>
+          <input type="number" step="0.1" min="0" name="er_match_diff_pct" placeholder="e.g. 2" value="{{ answers.er_match_diff_pct or '' }}">
         </div>
       </div>
     </div>
 
-    {# Q8 — Minimum wage check #}
     <div class="question-card">
-      <h3>Question 8 — Would you like us to check you're earning at least the minimum wage?</h3>
+      <h3>Would you like us to check you're earning at least the minimum wage?</h3>
       <div class="form-group">
         <select name="min_wage_check" id="min_wage_check">
-          <option value="">— Select —</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
+          <option value="" {{ 'selected' if not answers.min_wage_check }}>— Select —</option>
+          <option value="yes" {{ 'selected' if answers.min_wage_check == 'yes' or answers.min_wage_check == True }}>Yes</option>
+          <option value="no" {{ 'selected' if answers.min_wage_check == 'no' or answers.min_wage_check == False }}>No</option>
         </select>
       </div>
     </div>
 
-    {# Q9 — Date of birth (only if Q8 = yes) #}
     <div class="question-card" id="q9-block" style="display:none">
-      <h3>Question 9 — What is your date of birth?</h3>
-      <div class="info-tag">
-        💡 Entering your date of birth will help us check that your hourly pay is right for your age. We'll ask you a few more questions so we can give you an accurate result.
-      </div>
+      <h3>What is your date of birth?</h3>
+      <div class="info-tag">💡 Entering your date of birth will help us check that your hourly pay is right for your age.</div>
       <div class="form-group">
-        <input type="date" name="date_of_birth" id="date_of_birth">
+        <input type="date" name="date_of_birth" value="{{ answers.date_of_birth or '' }}">
       </div>
     </div>
 
-    {# MW questions — shown only if Q8 = yes #}
     <div id="mw-block" style="display:none">
-
       <div class="question-card">
-        <h3>MW1 — What are your contractual weekly hours?</h3>
+        <h3>What are your contractual weekly hours?</h3>
+        <div class="form-group"><input type="number" step="0.5" min="0" name="contractual_hours" placeholder="e.g. 37.5" value="{{ answers.contractual_hours or '' }}"></div>
+      </div>
+      <div class="question-card">
+        <h3>Did you have any time off in the period this payslip covers?</h3>
+        <div class="info-tag">💡 Include any paid or unpaid holiday days.</div>
         <div class="form-group">
-          <input type="number" step="0.5" min="0" name="contractual_hours" placeholder="e.g. 37.5">
+          <select name="had_time_off" id="had_time_off">
+            <option value="" {{ 'selected' if not answers.had_time_off }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.had_time_off == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.had_time_off == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.had_time_off == 'unsure' }}>Unsure</option>
+          </select>
+        </div>
+        <div id="mw2-days-block" style="{{ 'display:block' if answers.had_time_off == 'yes' else 'display:none' }}">
+          <div class="form-group">
+            <label>How many days off did you have?</label>
+            <input type="number" step="0.5" min="0" name="days_off" placeholder="e.g. 2" value="{{ answers.days_off or '' }}">
+          </div>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW2 — How many hours did you work in the period this payslip covers?</h3>
-        <div class="form-group">
-          <input type="number" step="0.5" min="0" name="hours_worked" placeholder="e.g. 162">
-        </div>
-      </div>
-
-      <div class="question-card">
-        <h3>MW3 — Are you an apprentice?</h3>
+        <h3>Are you an apprentice?</h3>
         <div class="form-group">
           <select name="is_apprentice" id="is_apprentice">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.is_apprentice }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.is_apprentice == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.is_apprentice == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card" id="mw4-block" style="display:none">
-        <h3>MW4 — Are you still in your first year of your apprenticeship?</h3>
-        <div class="info-tag">
-          💡 This applies even if your apprenticeship was started with a different employer.
-        </div>
+        <h3>Are you still in your first year of your apprenticeship?</h3>
+        <div class="info-tag">💡 This applies even if your apprenticeship was started with a different employer.</div>
         <div class="form-group">
           <select name="apprentice_first_year">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.apprentice_first_year }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.apprentice_first_year == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.apprentice_first_year == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW5 — Does your employer require you to come in earlier than your contracted hours?</h3>
-        <div class="info-tag">
-          💡 This could include signing into your computer, getting changed into a uniform, putting on PPE, or carrying out security checks.
-        </div>
+        <h3>Does your employer require you to come in earlier than your contracted hours?</h3>
+        <div class="info-tag">💡 This could include signing into your computer, getting changed into a uniform, putting on PPE, or carrying out security checks.</div>
         <div class="form-group">
           <select name="early_start">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.early_start }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.early_start == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.early_start == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW6 — Does your employer require you to work over your lunch break or after work without paying you?</h3>
+        <h3>Does your employer require you to work over your lunch break or after work without paying you?</h3>
         <div class="form-group">
           <select name="unpaid_overtime">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.unpaid_overtime }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.unpaid_overtime == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.unpaid_overtime == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW7 — During your working day, are you required to travel from one client to the next?</h3>
+        <h3>During your working day, are you required to travel from one client to the next?</h3>
         <div class="form-group">
           <select name="travels_clients" id="travels_clients">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.travels_clients }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.travels_clients == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.travels_clients == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card" id="mw8-block" style="display:none">
-        <h3>MW8 — Are you reimbursed for your travel costs (bus fare, train etc.)?</h3>
+        <h3>Are you reimbursed for your travel costs?</h3>
         <div class="form-group">
           <select name="travel_reimbursed">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.travel_reimbursed }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.travel_reimbursed == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.travel_reimbursed == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card" id="mw9-block" style="display:none">
-        <h3>MW9 — Are you paid for the time you spend travelling between clients?</h3>
-        <div class="info-tag">
-          💡 This excludes getting to and from work, and getting to your first client from home, or from your last client back home.
-        </div>
+        <h3>Are you paid for the time you spend travelling between clients?</h3>
+        <div class="info-tag">💡 This excludes getting to and from work, and getting to your first client from home, or from your last client back home.</div>
         <div class="form-group">
           <select name="paid_travel_time" id="paid_travel_time">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.paid_travel_time }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.paid_travel_time == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.paid_travel_time == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card" id="mw10-block" style="display:none">
-        <h3>MW10 — Enter the hours you spent travelling between clients during this payslip period</h3>
-        <div class="info-tag">
-          💡 For example, if you are paid on the 30th for work from the 15th of one month to the 14th of the next, enter the travel time between those dates.
-        </div>
-        <div class="form-group">
-          <input type="number" step="0.25" min="0" name="unpaid_travel_hours" placeholder="Hours (e.g. 12.5)">
-        </div>
+        <h3>Enter the hours you spent travelling between clients during this payslip period</h3>
+        <div class="info-tag">💡 For example, if you are paid on the 30th for work from the 15th of one month to the 14th of the next, enter the travel time between those dates.</div>
+        <div class="form-group"><input type="number" step="0.25" min="0" name="unpaid_travel_hours" placeholder="Hours (e.g. 12.5)" value="{{ answers.unpaid_travel_hours or '' }}"></div>
       </div>
-
       <div class="question-card">
-        <h3>MW11 — Are your shift times rounded down?</h3>
+        <h3>Are your shift times rounded down?</h3>
         <div class="form-group">
           <select name="shift_rounding">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-            <option value="unsure">Unsure</option>
+            <option value="" {{ 'selected' if not answers.shift_rounding }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.shift_rounding == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.shift_rounding == 'no' }}>No</option>
+            <option value="unsure" {{ 'selected' if answers.shift_rounding == 'unsure' }}>Unsure</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW12 — Does your employer require you to do unpaid training?</h3>
+        <h3>Does your employer require you to do unpaid training?</h3>
         <div class="form-group">
           <select name="unpaid_training">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.unpaid_training }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.unpaid_training == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.unpaid_training == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW13 — If you are paid an annual salary divided by 12, does your employer keep a record of your actual hours?</h3>
+        <h3>Does your employer keep a record of your actual hours worked in each pay period?</h3>
         <div class="form-group">
           <select name="employer_records_hours">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-            <option value="na">Not applicable — I am not salaried</option>
+            <option value="" {{ 'selected' if not answers.employer_records_hours }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.employer_records_hours == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.employer_records_hours == 'no' }}>No</option>
+            <option value="na" {{ 'selected' if answers.employer_records_hours == 'na' }}>Not applicable — I am not salaried</option>
           </select>
         </div>
       </div>
-
       <div class="question-card">
-        <h3>MW14 — Do you supply your own uniform?</h3>
-        <div class="info-tag">
-          💡 This can include shoes or business-related coloured clothing required by your employer.
-        </div>
+        <h3>Do you supply your own uniform?</h3>
+        <div class="info-tag">💡 This can include shoes or business-related coloured clothing required by your employer.</div>
         <div class="form-group">
           <select name="own_uniform">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
+            <option value="" {{ 'selected' if not answers.own_uniform }}>— Select —</option>
+            <option value="yes" {{ 'selected' if answers.own_uniform == 'yes' }}>Yes</option>
+            <option value="no" {{ 'selected' if answers.own_uniform == 'no' }}>No</option>
           </select>
         </div>
       </div>
-
-    </div>{# end mw-block #}
+    </div>
 
     <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
-      <button type="submit" class="btn btn-primary btn-large">Review My Answers →</button>
+      <button type="submit" class="btn btn-primary btn-large">Review My Answers</button>
       <a href="{{ url_for('upload') }}" class="btn btn-ghost">Skip &amp; Upload Payslip</a>
     </div>
 
@@ -362,68 +334,88 @@
 
 {% block scripts %}
 <script>
-// Q2 → show/hide Q3, Q4, Q6
-document.getElementById('pension_enrolled').addEventListener('change', function() {
-  const show = this.value === 'yes';
-  ['q3-block','q4-block','q6-block'].forEach(id => {
-    document.getElementById(id).style.display = show ? 'block' : 'none';
-  });
-  document.getElementById('q5-block').style.display = 'none';
-  document.getElementById('q7-block').style.display = 'none';
-});
+function show(id) { const el=document.getElementById(id); if(el) el.style.display='block'; }
+function hide(id) { const el=document.getElementById(id); if(el) el.style.display='none'; }
 
-// Q4 → show/hide Q5
+// Restore visibility on page load from saved answers
+function initVisibility() {
+  const pe = document.getElementById('pension_enrolled').value;
+  if (pe === 'yes') {
+    show('q3-block'); show('q4-block'); show('q6-block');
+    if (document.getElementById('knows_min_contribution').value === 'yes') show('q5-block');
+    const et = document.getElementById('er_matching_type').value;
+    if (et === 'a' || et === 'b') show('q6-pct-block');
+    if (et === 'b') { show('q7-block'); restoreQ7(); }
+  }
+  if (document.getElementById('min_wage_check').value === 'yes') {
+    show('q9-block'); show('mw-block');
+    if (document.getElementById('is_apprentice').value === 'yes') show('mw4-block');
+    if (document.getElementById('travels_clients').value === 'yes') {
+      show('mw8-block'); show('mw9-block');
+      if (document.getElementById('paid_travel_time').value === 'no') show('mw10-block');
+    }
+  }
+}
+
+function restoreQ7() {
+  const mt = document.getElementById('er_match_type').value;
+  if (mt === 'up_to_max') show('q7-max-block');
+  else if (mt === 'pct_above' || mt === 'pct_below') show('q7-diff-block');
+}
+
+document.getElementById('pension_enrolled').addEventListener('change', function() {
+  const s = this.value === 'yes';
+  ['q3-block','q4-block','q6-block'].forEach(id => document.getElementById(id).style.display = s ? 'block' : 'none');
+  if (!s) { hide('q5-block'); hide('q7-block'); }
+});
 document.getElementById('knows_min_contribution').addEventListener('change', function() {
   document.getElementById('q5-block').style.display = this.value === 'yes' ? 'block' : 'none';
 });
-
-// Q6 → show/hide Q7 and Er % input
 document.getElementById('er_matching_type').addEventListener('change', function() {
-  document.getElementById('q7-block').style.display = this.value === 'b' ? 'block' : 'none';
-  document.getElementById('q6-pct-block').style.display =
-    (this.value === 'a' || this.value === 'b') ? 'block' : 'none';
+  hide('q7-block'); hide('q6-pct-block');
+  if (this.value === 'a' || this.value === 'b') show('q6-pct-block');
+  if (this.value === 'b') show('q7-block');
 });
-
-// Q7 match type → show/hide % input
 document.getElementById('er_match_type').addEventListener('change', function() {
-  document.getElementById('q7-pct-block').style.display =
-    (this.value && this.value !== 'unsure') ? 'block' : 'none';
+  hide('q7-max-block'); hide('q7-diff-block');
+  if (this.value === 'up_to_max') show('q7-max-block');
+  else if (this.value === 'pct_above' || this.value === 'pct_below') show('q7-diff-block');
 });
-
-// Q8 → show/hide Q9 and MW block
 document.getElementById('min_wage_check').addEventListener('change', function() {
-  const show = this.value === 'yes';
-  document.getElementById('q9-block').style.display = show ? 'block' : 'none';
-  document.getElementById('mw-block').style.display = show ? 'block' : 'none';
+  const s = this.value === 'yes';
+  document.getElementById('q9-block').style.display = s ? 'block' : 'none';
+  document.getElementById('mw-block').style.display = s ? 'block' : 'none';
 });
-
-// MW3 → show/hide MW4
 document.getElementById('is_apprentice').addEventListener('change', function() {
   document.getElementById('mw4-block').style.display = this.value === 'yes' ? 'block' : 'none';
 });
-
-// MW7 → show/hide MW8, MW9
-document.getElementById('travels_clients').addEventListener('change', function() {
-  const show = this.value === 'yes';
-  document.getElementById('mw8-block').style.display = show ? 'block' : 'none';
-  document.getElementById('mw9-block').style.display = show ? 'block' : 'none';
-  document.getElementById('mw10-block').style.display = 'none';
+document.getElementById('had_time_off').addEventListener('change', function() {
+  document.getElementById('mw2-days-block').style.display = this.value === 'yes' ? 'block' : 'none';
 });
-
-// MW9 → show/hide MW10
+document.getElementById('travels_clients').addEventListener('change', function() {
+  const s = this.value === 'yes';
+  document.getElementById('mw8-block').style.display = s ? 'block' : 'none';
+  document.getElementById('mw9-block').style.display = s ? 'block' : 'none';
+  if (!s) hide('mw10-block');
+});
 document.getElementById('paid_travel_time').addEventListener('change', function() {
   document.getElementById('mw10-block').style.display = this.value === 'no' ? 'block' : 'none';
 });
 
-// Q5c mutual exclusivity
-['ee_total_pct','ee_total_gbp'].forEach(id => {
-  const el = document.getElementById(id);
-  if (el) el.addEventListener('input', function() {
+// Q5c — entering in c. clears a. and b. (both % AND £)
+// c. % and £ are mutually exclusive
+['ee_total_pct','ee_total_gbp'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', function() {
     if (this.value) {
-      ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp']
-        .forEach(f => { const fe = document.getElementById(f); if(fe) fe.value = ''; });
+      ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp'].forEach(function(f) {
+        const el = document.getElementById(f); if(el) el.value = '';
+      });
+      const other = id === 'ee_total_pct' ? 'ee_total_gbp' : 'ee_total_pct';
+      const otherEl = document.getElementById(other); if(otherEl) otherEl.value = '';
     }
   });
 });
+
+initVisibility();
 </script>
 {% endblock %}

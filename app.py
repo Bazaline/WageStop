@@ -50,44 +50,47 @@ def home():
 @app.route("/questions", methods=["GET", "POST"])
 def questions():
     if request.method == "POST":
-        # Save answers to session
         answers = {
-            "pay_frequency":        request.form.get("pay_frequency", "unsure"),
-            "pension_enrolled":     request.form.get("pension_enrolled"),
-            "pension_provider":     request.form.get("pension_provider"),
+            "pay_frequency":          request.form.get("pay_frequency", "unsure"),
+            "pension_enrolled":       request.form.get("pension_enrolled"),
+            "pension_provider":       request.form.get("pension_provider"),
             "knows_min_contribution": request.form.get("knows_min_contribution"),
-            "ee_min_pct":           request.form.get("ee_min_pct"),
-            "ee_min_gbp":           request.form.get("ee_min_gbp"),
-            "ee_additional_pct":    request.form.get("ee_additional_pct"),
-            "ee_additional_gbp":    request.form.get("ee_additional_gbp"),
-            "ee_total_pct":         request.form.get("ee_total_pct"),
-            "ee_total_gbp":         request.form.get("ee_total_gbp"),
-            "er_min_pct":           request.form.get("er_min_pct"),
-            "er_matching":          request.form.get("er_matching") == "yes",
-            "er_match_type":        request.form.get("er_match_type"),
-            "er_match_pct":         request.form.get("er_match_pct"),
-            "min_wage_check":       request.form.get("min_wage_check") == "yes",
-            "date_of_birth":        request.form.get("date_of_birth"),
-            # MW questions
-            "contractual_hours":    request.form.get("contractual_hours"),
-            "hours_worked":         request.form.get("hours_worked"),
-            "is_apprentice":        request.form.get("is_apprentice"),
-            "apprentice_first_year": request.form.get("apprentice_first_year"),
-            "early_start":          request.form.get("early_start"),
-            "unpaid_overtime":      request.form.get("unpaid_overtime"),
-            "travels_clients":      request.form.get("travels_clients"),
-            "travel_reimbursed":    request.form.get("travel_reimbursed"),
-            "paid_travel_time":     request.form.get("paid_travel_time"),
-            "unpaid_travel_hours":  request.form.get("unpaid_travel_hours"),
-            "shift_rounding":       request.form.get("shift_rounding"),
-            "unpaid_training":      request.form.get("unpaid_training"),
+            "ee_min_pct":             request.form.get("ee_min_pct"),
+            "ee_min_gbp":             request.form.get("ee_min_gbp"),
+            "ee_additional_pct":      request.form.get("ee_additional_pct"),
+            "ee_additional_gbp":      request.form.get("ee_additional_gbp"),
+            "ee_total_pct":           request.form.get("ee_total_pct"),
+            "ee_total_gbp":           request.form.get("ee_total_gbp"),
+            "er_matching_type":       request.form.get("er_matching_type"),
+            "er_min_pct":             request.form.get("er_min_pct"),
+            "er_match_type":          request.form.get("er_match_type"),
+            "er_match_max_pct":       request.form.get("er_match_max_pct"),
+            "er_match_diff_pct":      request.form.get("er_match_diff_pct"),
+            "min_wage_check":         request.form.get("min_wage_check"),
+            "date_of_birth":          request.form.get("date_of_birth"),
+            "contractual_hours":      request.form.get("contractual_hours"),
+            "had_time_off":           request.form.get("had_time_off"),
+            "days_off":               request.form.get("days_off"),
+            "hours_worked":           request.form.get("hours_worked"),
+            "is_apprentice":          request.form.get("is_apprentice"),
+            "apprentice_first_year":  request.form.get("apprentice_first_year"),
+            "early_start":            request.form.get("early_start"),
+            "unpaid_overtime":        request.form.get("unpaid_overtime"),
+            "travels_clients":        request.form.get("travels_clients"),
+            "travel_reimbursed":      request.form.get("travel_reimbursed"),
+            "paid_travel_time":       request.form.get("paid_travel_time"),
+            "unpaid_travel_hours":    request.form.get("unpaid_travel_hours"),
+            "shift_rounding":         request.form.get("shift_rounding"),
+            "unpaid_training":        request.form.get("unpaid_training"),
             "employer_records_hours": request.form.get("employer_records_hours"),
-            "own_uniform":          request.form.get("own_uniform"),
+            "own_uniform":            request.form.get("own_uniform"),
         }
         session["user_answers"] = answers
         return redirect(url_for("questions_summary"))
 
-    return render_template("questions.html")
+    # GET — pass saved answers back to template so they're pre-filled
+    answers = session.get("user_answers", {})
+    return render_template("questions.html", answers=answers)
 
 
 @app.route("/questions/summary")
