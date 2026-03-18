@@ -503,17 +503,16 @@ initVisibility();
 // ---- FORM VALIDATION ----
 document.getElementById('questions-form').addEventListener('submit', function(e) {
   // Clear all previous errors
-  document.querySelectorAll('.question-card').forEach(c => c.classList.remove('question-card--error'));
-  document.querySelectorAll('select, input').forEach(el => el.style.borderColor = '');
+  document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
 
   const errors = [];
 
-  function markError(id, cardId) {
+  function markError(id) {
     const el = document.getElementById(id);
-    if (el) el.style.borderColor = '#ef4444';
-    const card = document.getElementById(cardId || id)?.closest('.question-card');
-    if (card) card.classList.add('question-card--error');
-    errors.push(id);
+    if (el) {
+      el.classList.add('field-error');
+      errors.push(id);
+    }
   }
 
   function val(id) {
@@ -521,81 +520,67 @@ document.getElementById('questions-form').addEventListener('submit', function(e)
     return el ? el.value.trim() : '';
   }
 
-  function visible(id) {
-    const el = document.getElementById(id);
-    return el && el.style.display !== 'none';
-  }
-
-  // Q1 — pay frequency
+  // Q1
   if (!val('pay_frequency')) markError('pay_frequency');
 
-  // Q2 — pension enrolled
+  // Q2
   if (!val('pension_enrolled')) markError('pension_enrolled');
 
   if (val('pension_enrolled') === 'yes') {
-    // Q3 — provider
-    if (!val('pension_provider')) markError('pension_provider', 'q3-block');
-
-    // Q4 — knows min contribution
-    if (!val('knows_min_contribution')) markError('knows_min_contribution', 'q4-block');
+    // Q3
+    if (!val('pension_provider')) markError('pension_provider');
+    // Q4
+    if (!val('knows_min_contribution')) markError('knows_min_contribution');
 
     if (val('knows_min_contribution') === 'yes') {
-      // Q5 — must have at least one of a/b/c entries
+      // Q5 — need at least one contribution entry
       const hasAB = val('ee_min_pct') || val('ee_min_gbp');
       const hasC  = val('ee_total_pct') || val('ee_total_gbp');
       if (!hasAB && !hasC) {
-        // Mark Q5 inputs red
-        ['ee_min_pct','ee_min_gbp','ee_total_pct','ee_total_gbp'].forEach(id => markError(id, 'q5-block'));
+        ['ee_min_pct','ee_total_pct'].forEach(id => markError(id));
       }
     }
 
-    // Q6 — er matching type
-    if (!val('er_matching_type')) markError('er_matching_type', 'q6-block');
-
+    // Q6
+    if (!val('er_matching_type')) markError('er_matching_type');
     if (val('er_matching_type') === 'a' || val('er_matching_type') === 'b') {
-      if (!val('er_min_pct')) markError('er_min_pct', 'q6-block');
+      if (!val('er_min_pct')) markError('er_min_pct');
     }
-
     if (val('er_matching_type') === 'b') {
-      // Q7 — match type
-      if (!val('er_match_type')) markError('er_match_type', 'q7-block');
-      if (val('er_match_type') === 'up_to_max' && !val('er_match_max_pct')) markError('er_match_max_pct', 'q7-max-block');
-      if ((val('er_match_type') === 'pct_above' || val('er_match_type') === 'pct_below') && !val('er_match_diff_pct')) markError('er_match_diff_pct', 'q7-diff-block');
+      if (!val('er_match_type')) markError('er_match_type');
+      if (val('er_match_type') === 'up_to_max' && !val('er_match_max_pct')) markError('er_match_max_pct');
+      if ((val('er_match_type') === 'pct_above' || val('er_match_type') === 'pct_below') && !val('er_match_diff_pct')) markError('er_match_diff_pct');
     }
   }
 
-  // Q8 — min wage check
+  // Q8
   if (!val('min_wage_check')) markError('min_wage_check');
 
   if (val('min_wage_check') === 'yes') {
-    if (!val('date_of_birth'))       markError('date_of_birth', 'q9-block');
-    if (!val('contractual_hours'))   markError('contractual_hours');
-    if (!val('had_time_off'))        markError('had_time_off');
+    if (!val('date_of_birth'))          markError('date_of_birth');
+    if (!val('contractual_hours'))      markError('contractual_hours');
+    if (!val('had_time_off'))           markError('had_time_off');
     if (val('had_time_off') === 'yes' && !val('days_off')) markError('days_off');
-    if (!val('is_apprentice'))       markError('is_apprentice');
-    if (val('is_apprentice') === 'yes' && !val('apprentice_first_year')) markError('apprentice_first_year', 'mw4-block');
-    if (!val('early_start'))         markError('early_start');
-    if (!val('unpaid_overtime'))     markError('unpaid_overtime');
-    if (!val('travels_clients'))     markError('travels_clients');
+    if (!val('is_apprentice'))          markError('is_apprentice');
+    if (val('is_apprentice') === 'yes' && !val('apprentice_first_year')) markError('apprentice_first_year');
+    if (!val('early_start'))            markError('early_start');
+    if (!val('unpaid_overtime'))        markError('unpaid_overtime');
+    if (!val('travels_clients'))        markError('travels_clients');
     if (val('travels_clients') === 'yes') {
-      if (!val('travel_reimbursed')) markError('travel_reimbursed', 'mw8-block');
-      if (!val('paid_travel_time'))  markError('paid_travel_time', 'mw9-block');
-      if (val('paid_travel_time') === 'no' && !val('unpaid_travel_hours')) markError('unpaid_travel_hours', 'mw10-block');
+      if (!val('travel_reimbursed'))    markError('travel_reimbursed');
+      if (!val('paid_travel_time'))     markError('paid_travel_time');
+      if (val('paid_travel_time') === 'no' && !val('unpaid_travel_hours')) markError('unpaid_travel_hours');
     }
-    if (!val('shift_rounding'))      markError('shift_rounding');
-    if (!val('unpaid_training'))     markError('unpaid_training');
+    if (!val('shift_rounding'))         markError('shift_rounding');
+    if (!val('unpaid_training'))        markError('unpaid_training');
     if (!val('employer_records_hours')) markError('employer_records_hours');
-    if (!val('own_uniform'))         markError('own_uniform');
+    if (!val('own_uniform'))            markError('own_uniform');
   }
 
   if (errors.length > 0) {
     e.preventDefault();
-    // Scroll to first error
     const firstEl = document.getElementById(errors[0]);
-    if (firstEl) {
-      const card = firstEl.closest('.question-card') || firstEl;
-      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 });
 </script>

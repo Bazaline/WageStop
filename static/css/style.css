@@ -234,11 +234,9 @@ body {
   border: 1px solid #333336; padding: 1.75rem;
   margin-bottom: 1.25rem; box-shadow: var(--shadow);
 }
-.question-card--error {
-  border: 2px solid #ef4444 !important;
-}
-.question-card--error h3 {
-  color: #ef4444;
+.field-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.2) !important;
 }
 .question-card h3 {
   font-size: 1rem; font-weight: 700; color: #ffffff;
