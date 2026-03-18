@@ -158,7 +158,7 @@ body {
 
 .features {
   padding: 5rem 2rem;
-  background: #1a1a1a;
+  background: #111111;
 }
 .features h2, .how-it-works h2 {
   font-family: 'Sora', sans-serif;
@@ -173,20 +173,20 @@ body {
 }
 .feature-card {
   display: flex; align-items: flex-start; gap: 1rem;
-  background: #222222; border: 1px solid #333336;
+  background: #ffffff; border: 1px solid #eeeeee;
   border-radius: var(--radius); padding: 1.25rem;
   position: relative; overflow: hidden;
 }
 .feature-icon { font-size: 1.5rem; flex-shrink: 0; }
-.feature-text h3 { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.95rem; color: #fff; }
-.feature-text p  { font-size: 0.85rem; color: #888888; }
+.feature-text h3 { font-weight: 700; margin-bottom: 0.25rem; font-size: 0.95rem; color: #111111; }
+.feature-text p  { font-size: 0.85rem; color: #555555; }
 .feature-tag {
   position: absolute; top: 0.75rem; right: 0.75rem;
   font-size: 0.7rem; font-weight: 700; padding: 0.2rem 0.5rem;
   border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;
 }
-.feature-tag.free { background: #1a3a1a; color: #4ade80; }
-.feature-tag.paid { background: #3a2a0a; color: #fbbf24; }
+.feature-tag.free { background: #dcfce7; color: #166534; }
+.feature-tag.paid { background: #fef3c7; color: #92400e; }
 
 .how-it-works { padding: 5rem 2rem; background: #111111; }
 .steps {
@@ -194,7 +194,7 @@ body {
   flex-wrap: wrap; justify-content: center; margin-bottom: 3rem;
 }
 .step {
-  background: #222222; border: 1px solid #333336;
+  background: #ffffff; border: 1px solid #eeeeee;
   border-radius: var(--radius); padding: 2rem 1.5rem;
   text-align: center; flex: 1; min-width: 200px; max-width: 280px;
 }
@@ -205,8 +205,8 @@ body {
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 1rem;
 }
-.step h3 { font-weight: 700; margin-bottom: 0.5rem; color: #fff; }
-.step p  { font-size: 0.875rem; color: #888888; }
+.step h3 { font-weight: 700; margin-bottom: 0.5rem; color: #111111; }
+.step p  { font-size: 0.875rem; color: #555555; }
 .step-arrow { font-size: 1.5rem; color: #ff4500; }
 .cta-centre { text-align: center; }
 
