@@ -558,17 +558,18 @@ input[type="date"], input[type="email"] {
   width: 100%; padding: 0.65rem 0.9rem;
   border: 1.5px solid #333336; border-radius: 8px;
   font-family: 'Sora', sans-serif; font-size: 0.95rem;
-  color: #ffffff; background: #1a1a1a;
+  color: #111111; background: #ffffff;
   transition: border-color 0.2s;
   appearance: none;
-  color-scheme: dark;
+  color-scheme: light;
 }
 select:focus, input:focus {
   outline: none; border-color: #ff4500;
   box-shadow: 0 0 0 3px rgba(255,69,0,0.15);
 }
+select option { background: #ffffff; color: #111111; }
 input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(1); cursor: pointer;
+  filter: none; cursor: pointer;
 }
 .inline-pair {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
