@@ -50,7 +50,17 @@
     {% if answers.er_match_type and answers.er_match_type not in ('', 'unsure') and answers.er_matching %}
     <div class="summary-row">
       <span>Employer matching</span>
-      <span>{{ {'up_to_max':'Matches up to a max %','pct_higher':'Set % higher','pct_lower':'Set % lower'}.get(answers.er_match_type, answers.er_match_type) }}{% if answers.er_match_pct %} ({{ answers.er_match_pct }}%){% endif %}</span>
+      <span>
+        {% if answers.er_match_type == 'full_match' %}
+          Matching
+        {% elif answers.er_match_type == 'up_to_max' %}
+          Match up to {% if answers.er_match_max_pct %}{{ answers.er_match_max_pct }}%{% endif %}
+        {% elif answers.er_match_type == 'pct_above' %}
+          Match {% if answers.er_match_diff_pct %}{{ answers.er_match_diff_pct }}%{% endif %} above
+        {% elif answers.er_match_type == 'pct_below' %}
+          Match {% if answers.er_match_diff_pct %}{{ answers.er_match_diff_pct }}%{% endif %} below
+        {% endif %}
+      </span>
     </div>
     {% endif %}
   </div>
