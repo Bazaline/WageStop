@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Upload Your Payslip — Wagestop{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Upload Your Payslip</h1>
+  <p>PDF, JPG, PNG or other image format — we'll read it automatically</p>
+</div>
+<div class="upload-wrap">
+  {% if error %}
+    <div class="error-msg">{{ error }}</div>
+  {% endif %}
+  <form method="POST" enctype="multipart/form-data" id="upload-form">
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="upload-icon">📄</div>
+      <h3>Drop your payslip here</h3>
+      <p>or click to browse files</p>
+      <p class="upload-formats">PDF · JPG · PNG · GIF · WEBP</p>
+      <input type="file" id="file-input" name="payslip" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff">
+    </div>
+    <p id="file-name" style="text-align:center;margin-top:0.75rem;font-size:0.875rem;color:#475569"></p>
+    <div style="margin-top:1.5rem">
+      <button type="submit" class="btn btn-primary btn-full btn-large">Scan My Payslip →</button>
+    </div>
+  </form>
+  <p class="skip-link" style="margin-top:1.5rem">
+    Haven't answered the questions yet?
+    <a href="{{ url_for('questions') }}">Answer them first</a> for a more personalised result.
+  </p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const input = document.getElementById('file-input');
+const nameEl = document.getElementById('file-name');
+const zone = document.getElementById('drop-zone');
+input.addEventListener('change', () => {
+  if (input.files[0]) nameEl.textContent = '📎 ' + input.files[0].name;
+});
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('dragging');
+  input.files = e.dataTransfer.files;
+  if (input.files[0]) nameEl.textContent = '📎 ' + input.files[0].name;
+});
+</script>
+{% endblock %}

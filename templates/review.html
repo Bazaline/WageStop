@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Review Your Payslip Data — Wagestop{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Review Your Payslip Data</h1>
+  <p>Check the figures we've extracted. You can edit anything before we run the analysis.</p>
+</div>
+
+<div class="review-wrap">
+  <form method="POST" id="review-form">
+
+    {# Metadata #}
+    <div class="review-section">
+      <div class="review-section-header">Payslip Details</div>
+      <div class="metadata-grid">
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" name="payment_date" value="{{ payslip_data.metadata.payment_date or '' }}">
+        </div>
+        <div class="form-group">
+          <label>Tax Code</label>
+          <input type="text" name="tax_code" value="{{ payslip_data.metadata.tax_code or '1257L' }}">
+        </div>
+        <div class="form-group">
+          <label>NI Category</label>
+          <select name="ni_category">
+            {% for cat in ['A','B','C','D','E','F','H','I','J','K','L','M','N','S','V','Z'] %}
+              <option value="{{ cat }}" {{ 'selected' if payslip_data.metadata.ni_category == cat }}>{{ cat }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Software Identified</label>
+          <input type="text" value="{{ payslip_data.metadata.software or 'Not identified' }}" readonly style="background:#f1f5f9;color:#94a3b8">
+        </div>
+      </div>
+    </div>
+
+    {# Pay lines grouped by category #}
+    {% set all_lines = payslip_data.get('all_lines', []) %}
+    {% set line_index = namespace(val=0) %}
+
+    {% for category, codes in element_categories.items() %}
+      {% set cat_lines = all_lines | selectattr('category','equalto',category) | list %}
+      {% if cat_lines %}
+        <div class="review-section">
+          <div class="review-section-header">
+            {{ category }}
+            <button type="button" onclick="addLine('{{ category }}')">+ Add line</button>
+          </div>
+          <table class="review-table">
+            <thead>
+              <tr>
+                <th style="width:35%">Description</th>
+                <th style="width:25%">Type</th>
+                <th style="width:20%" class="amount-col">Amount (£)</th>
+                <th style="width:10%"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-{{ category | replace(' ','_') }}">
+              {% for line in cat_lines %}
+                <tr>
+                  <td>
+                    <input type="text" name="line_{{ line_index.val }}_description"
+                           value="{{ line.description }}" onchange="markAmended({{ line_index.val }})">
+                  </td>
+                  <td>
+                    <select name="line_{{ line_index.val }}_element_code" onchange="markAmended({{ line_index.val }})">
+                      {% for code, name in [
+                          ('A1','Salary'),('A2','Overtime'),('A3','Holiday Pay'),
+                          ('A4','Back Pay'),('A5','Commission'),('A6','Bonus'),
+                          ('A7','On Call'),('A8','Incentive'),('A9','Car Allowance'),
+                          ('A10','Mobile Allowance'),('A11','WFH Allowance'),
+                          ('A12','Tronc'),('A13','Expenses'),('A14','PILON'),
+                          ('A15','Redundancy'),('A16','SMP'),('A17','SPP'),
+                          ('A18','SSP'),('A19','Enhanced Pay'),('A16_OR_A17','Parental Pay'),
+                          ('B1','Student Loan'),('B2','PG Loan'),('B3','Unpaid Leave'),
+                          ('B4','Unpaid Sick'),('B5','Salary Sacrifice'),('B6','Loan Repayment'),
+                          ('B7','Net Deduction'),('B8','Personal Expense'),
+                          ('C1','Income Tax'),('C2','National Insurance'),
+                          ('C3','Pension (RAS)'),('C4','Pension (NPA)'),
+                          ('C5','Pension (Sal Sac)'),('C6','AVC'),
+                          ('D1','Healthcare BIK'),('D2','Medical BIK'),('D3','Car BIK'),
+                          ('E1','Employer NI'),('E3','Employer Pension'),
+                          ('A100','Other'),
+                      ] %}
+                        <option value="{{ code }}" {{ 'selected' if line.element_code == code }}>{{ name }}</option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td class="amount-col">
+                    <input type="text" name="line_{{ line_index.val }}_amount"
+                           value="{{ '%.2f'|format(line.amount) }}"
+                           style="text-align:right" onchange="markAmended({{ line_index.val }})">
+                  </td>
+                  <td>
+                    <input type="hidden" name="line_{{ line_index.val }}_amended" id="amended_{{ line_index.val }}" value="0">
+                    <button type="button" onclick="removeLine(this)" style="background:none;border:none;cursor:pointer;color:#94a3b8;font-size:1rem">✕</button>
+                  </td>
+                </tr>
+                {% set line_index.val = line_index.val + 1 %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <input type="hidden" name="line_count" id="line_count" value="{{ line_index.val }}">
+
+    {# Summary figures (for cross-check) #}
+    <div class="review-section">
+      <div class="review-section-header">Summary Figures (from payslip — for cross-checking)</div>
+      <div class="metadata-grid">
+        <div class="form-group">
+          <label>Tax Paid (£)</label>
+          <input type="text" name="tax_paid" value="{{ payslip_data.summary.get('tax_paid','') or '' }}">
+        </div>
+        <div class="form-group">
+          <label>NI Paid (£)</label>
+          <input type="text" name="ni_paid" value="{{ payslip_data.summary.get('ni_paid','') or '' }}">
+        </div>
+        <div class="form-group">
+          <label>Employee Pension (£)</label>
+          <input type="text" name="ee_pension" value="{{ payslip_data.pension.get('ee_contribution','') or '' }}">
+        </div>
+        <div class="form-group">
+          <label>Employer Pension (£)</label>
+          <input type="text" name="er_pension" value="{{ payslip_data.pension.get('er_contribution','') or '' }}">
+        </div>
+        <div class="form-group">
+          <label>Net Pay (£)</label>
+          <input type="text" name="net_pay" value="{{ payslip_data.summary.get('net_pay','') or '' }}">
+        </div>
+      </div>
+    </div>
+
+    {# Confirm bar #}
+    <div class="confirm-bar">
+      <p style="font-size:0.875rem;color:#475569">Happy with the data above?</p>
+      <button type="submit" class="btn btn-primary">This data looks correct →</button>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function markAmended(idx) {
+  document.getElementById('amended_' + idx).value = '1';
+}
+function removeLine(btn) {
+  btn.closest('tr').remove();
+}
+function addLine(category) {
+  const idx = parseInt(document.getElementById('line_count').value);
+  const tbody = document.getElementById('tbody-' + category.replace(/ /g,'_'));
+  if (!tbody) return;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" name="line_${idx}_description" placeholder="Description" onchange="markAmended(${idx})"></td>
+    <td><select name="line_${idx}_element_code"><option value="A100">Other</option></select></td>
+    <td class="amount-col"><input type="text" name="line_${idx}_amount" value="0.00" style="text-align:right" onchange="markAmended(${idx})"></td>
+    <td>
+      <input type="hidden" name="line_${idx}_amended" id="amended_${idx}" value="1">
+      <button type="button" onclick="removeLine(this)" style="background:none;border:none;cursor:pointer;color:#94a3b8">✕</button>
+    </td>`;
+  tbody.appendChild(tr);
+  document.getElementById('line_count').value = idx + 1;
+}
+</script>
+{% endblock %}

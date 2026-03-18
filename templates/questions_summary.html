@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Your Answers — Wagestop{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Your Answers</h1>
+  <p>Here's a summary of what you've told us. You can go back and change anything.</p>
+</div>
+
+<div class="summary-wrap">
+
+  <div class="summary-card">
+    <h3>Pay</h3>
+    <div class="summary-row">
+      <span>How often you're paid</span>
+      <span>{{ answers.pay_frequency | title if answers.pay_frequency else 'Not answered' }}</span>
+    </div>
+  </div>
+
+  {% if answers.pension_enrolled %}
+  <div class="summary-card">
+    <h3>Pension</h3>
+    <div class="summary-row">
+      <span>Enrolled in workplace pension</span>
+      <span>{{ answers.pension_enrolled | title }}</span>
+    </div>
+    {% if answers.pension_provider %}
+    <div class="summary-row">
+      <span>Pension provider</span>
+      <span>{{ answers.pension_provider }}</span>
+    </div>
+    {% endif %}
+    {% if answers.ee_total_pct %}
+    <div class="summary-row">
+      <span>Your total contribution</span>
+      <span>{{ answers.ee_total_pct }}%{% if answers.ee_total_gbp %} / £{{ answers.ee_total_gbp }}{% endif %}</span>
+    </div>
+    {% elif answers.ee_min_pct %}
+    <div class="summary-row">
+      <span>Your minimum contribution</span>
+      <span>{{ answers.ee_min_pct }}%{% if answers.ee_min_gbp %} / £{{ answers.ee_min_gbp }}{% endif %}</span>
+    </div>
+    {% if answers.ee_additional_pct %}
+    <div class="summary-row">
+      <span>Your additional contribution</span>
+      <span>{{ answers.ee_additional_pct }}%{% if answers.ee_additional_gbp %} / £{{ answers.ee_additional_gbp }}{% endif %}</span>
+    </div>
+    {% endif %}
+    {% endif %}
+    {% if answers.er_min_pct %}
+    <div class="summary-row">
+      <span>Employer minimum contribution</span>
+      <span>{{ answers.er_min_pct }}%</span>
+    </div>
+    {% endif %}
+    {% if answers.er_match_type %}
+    <div class="summary-row">
+      <span>Employer matching</span>
+      <span>{{ answers.er_match_type | replace('_',' ') | title }}{% if answers.er_match_pct %} {{ answers.er_match_pct }}%{% endif %}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if answers.min_wage_check == 'yes' %}
+  <div class="summary-card">
+    <h3>Minimum Wage Check</h3>
+    {% if answers.date_of_birth %}
+    <div class="summary-row"><span>Date of birth</span><span>{{ answers.date_of_birth }}</span></div>
+    {% endif %}
+    {% if answers.contractual_hours %}
+    <div class="summary-row"><span>Contractual weekly hours</span><span>{{ answers.contractual_hours }}</span></div>
+    {% endif %}
+    {% if answers.hours_worked %}
+    <div class="summary-row"><span>Hours worked this period</span><span>{{ answers.hours_worked }}</span></div>
+    {% endif %}
+    {% if answers.is_apprentice %}
+    <div class="summary-row"><span>Apprentice</span><span>{{ answers.is_apprentice | title }}</span></div>
+    {% endif %}
+    {% if answers.early_start %}
+    <div class="summary-row"><span>Required to start early</span><span>{{ answers.early_start | title }}</span></div>
+    {% endif %}
+    {% if answers.unpaid_overtime %}
+    <div class="summary-row"><span>Unpaid overtime / lunch</span><span>{{ answers.unpaid_overtime | title }}</span></div>
+    {% endif %}
+    {% if answers.travels_clients %}
+    <div class="summary-row"><span>Travels between clients</span><span>{{ answers.travels_clients | title }}</span></div>
+    {% endif %}
+    {% if answers.shift_rounding %}
+    <div class="summary-row"><span>Shift times rounded down</span><span>{{ answers.shift_rounding | title }}</span></div>
+    {% endif %}
+    {% if answers.unpaid_training %}
+    <div class="summary-row"><span>Unpaid training required</span><span>{{ answers.unpaid_training | title }}</span></div>
+    {% endif %}
+    {% if answers.own_uniform %}
+    <div class="summary-row"><span>Supplies own uniform</span><span>{{ answers.own_uniform | title }}</span></div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+    <a href="{{ url_for('upload') }}" class="btn btn-primary btn-large">Continue to Upload →</a>
+    <a href="{{ url_for('questions') }}" class="btn btn-ghost">Go Back &amp; Change Answers</a>
+  </div>
+
+</div>
+{% endblock %}

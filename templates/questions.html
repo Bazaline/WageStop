@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+{% block title %}Tell Us About Your Pay — Wagestop{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>A Few Quick Questions</h1>
+  <p>By answering these, we'll spot more errors and give you a more personalised result. You can always skip this step if you want to.</p>
+</div>
+
+<div class="questions-wrap">
+  <form method="POST" id="questions-form">
+
+    {# Q1 — Pay frequency #}
+    <div class="question-card">
+      <h3>Question 1 — How often are you paid?</h3>
+      <div class="form-group">
+        <select name="pay_frequency" id="pay_frequency">
+          <option value="unsure">— Select —</option>
+          <option value="monthly">Monthly</option>
+          <option value="weekly">Weekly</option>
+          <option value="unsure">Unsure</option>
+        </select>
+      </div>
+    </div>
+
+    {# Q2 — Pension enrolled #}
+    <div class="question-card">
+      <h3>Question 2 — Are you enrolled in your workplace pension scheme?</h3>
+      <div class="form-group">
+        <select name="pension_enrolled" id="pension_enrolled">
+          <option value="">— Select —</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+          <option value="unsure">Unsure</option>
+        </select>
+      </div>
+    </div>
+
+    {# Q3 — Pension provider (only if Q2 = yes) #}
+    <div class="question-card" id="q3-block" style="display:none">
+      <h3>Question 3 — Who is your pension provider?</h3>
+      <div class="form-group">
+        <select name="pension_provider" id="pension_provider">
+          <option value="unsure">Unsure</option>
+          <option value="Cushon">Cushon</option>
+          <option value="Nest">Nest</option>
+          <option value="The People's Pension">The People's Pension</option>
+          <option value="Royal London">Royal London</option>
+          <option value="Aviva">Aviva</option>
+          <option value="Aegon">Aegon</option>
+          <option value="True Potential">True Potential</option>
+          <option value="Smart Pensions">Smart Pensions</option>
+          <option value="Now Pensions">Now Pensions</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    {# Q4 — Knows minimum contribution (only if Q2 = yes) #}
+    <div class="question-card" id="q4-block" style="display:none">
+      <h3>Question 4 — Do you know what your minimum pension contribution should be?</h3>
+      <div class="form-group">
+        <select name="knows_min_contribution" id="knows_min_contribution">
+          <option value="">— Select —</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+          <option value="unsure">Unsure</option>
+        </select>
+      </div>
+    </div>
+
+    {# Q5 — Employee contribution (only if Q4 = yes) #}
+    <div class="question-card" id="q5-block" style="display:none">
+      <h3>Question 5 — What are your pension contributions?</h3>
+      <div class="info-tag">
+        💡 Enter either a. and b., OR c. — entering a total in c. will clear a. and b.
+      </div>
+
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">
+        a. My minimum contribution should be:
+      </p>
+      <div class="inline-pair">
+        <div class="form-group">
+          <label>Percentage (%)</label>
+          <input type="number" step="0.1" min="0" name="ee_min_pct" id="ee_min_pct" placeholder="e.g. 5">
+        </div>
+        <div class="form-group">
+          <label>Or amount each payday (£)</label>
+          <input type="number" step="0.01" min="0" name="ee_min_gbp" id="ee_min_gbp" placeholder="e.g. 125.00">
+        </div>
+      </div>
+
+      <p style="font-size:0.875rem;font-weight:600;margin:0.75rem 0;color:#1e293b">
+        b. In addition, I should contribute an extra:
+      </p>
+      <div class="inline-pair">
+        <div class="form-group">
+          <label>Percentage (%)</label>
+          <input type="number" step="0.1" min="0" name="ee_additional_pct" id="ee_additional_pct" placeholder="e.g. 2">
+        </div>
+        <div class="form-group">
+          <label>Or amount each payday (£)</label>
+          <input type="number" step="0.01" min="0" name="ee_additional_gbp" id="ee_additional_gbp" placeholder="e.g. 50.00">
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:1rem;margin:1rem 0">
+        <div style="flex:1;height:1px;background:#e2e8f0"></div>
+        <span style="font-size:0.8rem;color:#94a3b8;font-weight:600">OR</span>
+        <div style="flex:1;height:1px;background:#e2e8f0"></div>
+      </div>
+
+      <p style="font-size:0.875rem;font-weight:600;margin-bottom:0.75rem;color:#1e293b">
+        c. I should contribute a total of:
+      </p>
+      <div class="inline-pair">
+        <div class="form-group">
+          <label>Percentage (%)</label>
+          <input type="number" step="0.1" min="0" name="ee_total_pct" id="ee_total_pct" placeholder="e.g. 7">
+        </div>
+        <div class="form-group">
+          <label>Or amount each payday (£)</label>
+          <input type="number" step="0.01" min="0" name="ee_total_gbp" id="ee_total_gbp" placeholder="e.g. 175.00">
+        </div>
+      </div>
+    </div>
+
+    {# Q6 — Employer contribution (only if Q2 = yes) #}
+    <div class="question-card" id="q6-block" style="display:none">
+      <h3>Question 6 — Do you know what your employer's minimum pension contribution should be?</h3>
+      <div class="form-group">
+        <select name="er_matching_type" id="er_matching_type">
+          <option value="">— Select —</option>
+          <option value="a">Yes, my employer's minimum contribution should be _____%</option>
+          <option value="b">Yes, my employer's minimum is _____% and they match my contribution</option>
+          <option value="c">No</option>
+          <option value="d">Unsure</option>
+        </select>
+      </div>
+      <div id="q6-pct-block" style="display:none">
+        <div class="form-group">
+          <label>Employer minimum contribution (%)</label>
+          <input type="number" step="0.1" min="0" name="er_min_pct" id="er_min_pct" placeholder="e.g. 3">
+        </div>
+      </div>
+    </div>
+
+    {# Q7 — Employer matching (only if Q6 = b) #}
+    <div class="question-card" id="q7-block" style="display:none">
+      <h3>Question 7 — How does your employer match your contribution?</h3>
+      <div class="form-group">
+        <select name="er_match_type" id="er_match_type">
+          <option value="">— Select —</option>
+          <option value="up_to_max">Matched up to a max of _____%</option>
+          <option value="pct_higher">Should be _____% higher than my contribution</option>
+          <option value="pct_lower">Should be _____% lower than my contribution</option>
+          <option value="unsure">Unsure</option>
+        </select>
+      </div>
+      <div id="q7-pct-block" style="display:none">
+        <div class="form-group">
+          <label>Percentage (%)</label>
+          <input type="number" step="0.1" min="0" name="er_match_pct" id="er_match_pct" placeholder="e.g. 5">
+        </div>
+      </div>
+    </div>
+
+    {# Q8 — Minimum wage check #}
+    <div class="question-card">
+      <h3>Question 8 — Would you like us to check you're earning at least the minimum wage?</h3>
+      <div class="form-group">
+        <select name="min_wage_check" id="min_wage_check">
+          <option value="">— Select —</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    {# Q9 — Date of birth (only if Q8 = yes) #}
+    <div class="question-card" id="q9-block" style="display:none">
+      <h3>Question 9 — What is your date of birth?</h3>
+      <div class="info-tag">
+        💡 Entering your date of birth will help us check that your hourly pay is right for your age. We'll ask you a few more questions so we can give you an accurate result.
+      </div>
+      <div class="form-group">
+        <input type="date" name="date_of_birth" id="date_of_birth">
+      </div>
+    </div>
+
+    {# MW questions — shown only if Q8 = yes #}
+    <div id="mw-block" style="display:none">
+
+      <div class="question-card">
+        <h3>MW1 — What are your contractual weekly hours?</h3>
+        <div class="form-group">
+          <input type="number" step="0.5" min="0" name="contractual_hours" placeholder="e.g. 37.5">
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW2 — How many hours did you work in the period this payslip covers?</h3>
+        <div class="form-group">
+          <input type="number" step="0.5" min="0" name="hours_worked" placeholder="e.g. 162">
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW3 — Are you an apprentice?</h3>
+        <div class="form-group">
+          <select name="is_apprentice" id="is_apprentice">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card" id="mw4-block" style="display:none">
+        <h3>MW4 — Are you still in your first year of your apprenticeship?</h3>
+        <div class="info-tag">
+          💡 This applies even if your apprenticeship was started with a different employer.
+        </div>
+        <div class="form-group">
+          <select name="apprentice_first_year">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW5 — Does your employer require you to come in earlier than your contracted hours?</h3>
+        <div class="info-tag">
+          💡 This could include signing into your computer, getting changed into a uniform, putting on PPE, or carrying out security checks.
+        </div>
+        <div class="form-group">
+          <select name="early_start">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW6 — Does your employer require you to work over your lunch break or after work without paying you?</h3>
+        <div class="form-group">
+          <select name="unpaid_overtime">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW7 — During your working day, are you required to travel from one client to the next?</h3>
+        <div class="form-group">
+          <select name="travels_clients" id="travels_clients">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card" id="mw8-block" style="display:none">
+        <h3>MW8 — Are you reimbursed for your travel costs (bus fare, train etc.)?</h3>
+        <div class="form-group">
+          <select name="travel_reimbursed">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card" id="mw9-block" style="display:none">
+        <h3>MW9 — Are you paid for the time you spend travelling between clients?</h3>
+        <div class="info-tag">
+          💡 This excludes getting to and from work, and getting to your first client from home, or from your last client back home.
+        </div>
+        <div class="form-group">
+          <select name="paid_travel_time" id="paid_travel_time">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card" id="mw10-block" style="display:none">
+        <h3>MW10 — Enter the hours you spent travelling between clients during this payslip period</h3>
+        <div class="info-tag">
+          💡 For example, if you are paid on the 30th for work from the 15th of one month to the 14th of the next, enter the travel time between those dates.
+        </div>
+        <div class="form-group">
+          <input type="number" step="0.25" min="0" name="unpaid_travel_hours" placeholder="Hours (e.g. 12.5)">
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW11 — Are your shift times rounded down?</h3>
+        <div class="form-group">
+          <select name="shift_rounding">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="unsure">Unsure</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW12 — Does your employer require you to do unpaid training?</h3>
+        <div class="form-group">
+          <select name="unpaid_training">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW13 — If you are paid an annual salary divided by 12, does your employer keep a record of your actual hours?</h3>
+        <div class="form-group">
+          <select name="employer_records_hours">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="na">Not applicable — I am not salaried</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <h3>MW14 — Do you supply your own uniform?</h3>
+        <div class="info-tag">
+          💡 This can include shoes or business-related coloured clothing required by your employer.
+        </div>
+        <div class="form-group">
+          <select name="own_uniform">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      </div>
+
+    </div>{# end mw-block #}
+
+    <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+      <button type="submit" class="btn btn-primary btn-large">Review My Answers →</button>
+      <a href="{{ url_for('upload') }}" class="btn btn-ghost">Skip &amp; Upload Payslip</a>
+    </div>
+
+  </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Q2 → show/hide Q3, Q4, Q6
+document.getElementById('pension_enrolled').addEventListener('change', function() {
+  const show = this.value === 'yes';
+  ['q3-block','q4-block','q6-block'].forEach(id => {
+    document.getElementById(id).style.display = show ? 'block' : 'none';
+  });
+  document.getElementById('q5-block').style.display = 'none';
+  document.getElementById('q7-block').style.display = 'none';
+});
+
+// Q4 → show/hide Q5
+document.getElementById('knows_min_contribution').addEventListener('change', function() {
+  document.getElementById('q5-block').style.display = this.value === 'yes' ? 'block' : 'none';
+});
+
+// Q6 → show/hide Q7 and Er % input
+document.getElementById('er_matching_type').addEventListener('change', function() {
+  document.getElementById('q7-block').style.display = this.value === 'b' ? 'block' : 'none';
+  document.getElementById('q6-pct-block').style.display =
+    (this.value === 'a' || this.value === 'b') ? 'block' : 'none';
+});
+
+// Q7 match type → show/hide % input
+document.getElementById('er_match_type').addEventListener('change', function() {
+  document.getElementById('q7-pct-block').style.display =
+    (this.value && this.value !== 'unsure') ? 'block' : 'none';
+});
+
+// Q8 → show/hide Q9 and MW block
+document.getElementById('min_wage_check').addEventListener('change', function() {
+  const show = this.value === 'yes';
+  document.getElementById('q9-block').style.display = show ? 'block' : 'none';
+  document.getElementById('mw-block').style.display = show ? 'block' : 'none';
+});
+
+// MW3 → show/hide MW4
+document.getElementById('is_apprentice').addEventListener('change', function() {
+  document.getElementById('mw4-block').style.display = this.value === 'yes' ? 'block' : 'none';
+});
+
+// MW7 → show/hide MW8, MW9
+document.getElementById('travels_clients').addEventListener('change', function() {
+  const show = this.value === 'yes';
+  document.getElementById('mw8-block').style.display = show ? 'block' : 'none';
+  document.getElementById('mw9-block').style.display = show ? 'block' : 'none';
+  document.getElementById('mw10-block').style.display = 'none';
+});
+
+// MW9 → show/hide MW10
+document.getElementById('paid_travel_time').addEventListener('change', function() {
+  document.getElementById('mw10-block').style.display = this.value === 'no' ? 'block' : 'none';
+});
+
+// Q5c mutual exclusivity
+['ee_total_pct','ee_total_gbp'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
+    if (this.value) {
+      ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp']
+        .forEach(f => { const fe = document.getElementById(f); if(fe) fe.value = ''; });
+    }
+  });
+});
+</script>
+{% endblock %}
