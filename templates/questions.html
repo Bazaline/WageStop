@@ -376,7 +376,7 @@
     </div>
 
     <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
-      <button type="submit" class="btn btn-primary btn-large">Review My Answers</button>
+      <button type="button" onclick="validateAndSubmit()" class="btn btn-primary btn-large">Review My Answers</button>
       <a href="{{ url_for('upload') }}" class="btn btn-ghost">Skip &amp; Upload Payslip</a>
     </div>
 
@@ -501,7 +501,7 @@ cFields.forEach(function(id) {
 initVisibility();
 
 // ---- FORM VALIDATION ----
-document.getElementById('questions-form').addEventListener('submit', function(e) {
+function validateAndSubmit() {
   // Clear all previous errors
   document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
 
@@ -533,7 +533,6 @@ document.getElementById('questions-form').addEventListener('submit', function(e)
     if (!val('knows_min_contribution')) markError('knows_min_contribution');
 
     if (val('knows_min_contribution') === 'yes') {
-      // Q5 — need at least one contribution entry
       const hasAB = val('ee_min_pct') || val('ee_min_gbp');
       const hasC  = val('ee_total_pct') || val('ee_total_gbp');
       if (!hasAB && !hasC) {
@@ -578,10 +577,14 @@ document.getElementById('questions-form').addEventListener('submit', function(e)
   }
 
   if (errors.length > 0) {
-    e.preventDefault();
+    // Scroll to first error
     const firstEl = document.getElementById(errors[0]);
     if (firstEl) firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return; // STOP — do not submit
   }
-});
+
+  // All good — submit
+  document.getElementById('questions-form').submit();
+}
 </script>
 {% endblock %}
