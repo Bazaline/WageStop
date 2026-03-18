@@ -15,6 +15,9 @@ from .models import (
 from .tax import calculate_tax
 from .ni import calculate_ni
 from .pension import calculate_pension
+from .student_loan import validate_student_loan, identify_student_loan_plan
+from .special_elements import scan_special_elements
+from .statutory_pay import validate_stat_pay_pension
 
 # ---------------------------------------------------------------------------
 # TOLERANCE LEVELS (P7 — strict)
@@ -50,24 +53,6 @@ def detect_tax_period(payment_date_str: str) -> int:
     except (ValueError, TypeError):
         return 1
 
-    # Tax month: April 6 = M1, May 6 = M2, etc.
-    tax_month_starts = [
-        (4, 6), (5, 6), (6, 6), (7, 6), (8, 6), (9, 6),
-        (10, 6), (11, 6), (12, 6), (1, 6), (2, 6), (3, 6)
-    ]
-    year = d.year
-    for i, (month, day) in enumerate(tax_month_starts):
-        # Handle year boundary (Jan-Mar belong to next tax year)
-        if month <= 3:
-            period_start = date(year + 1, month, day)
-            if i > 0:
-                prev_month, prev_day = tax_month_starts[i-1]
-                period_end_year = year + 1 if prev_month <= 3 else year
-                period_end = date(period_end_year, prev_month, prev_day) if i == 0 \
-                    else date(year + 1 if month <= 3 else year, month, day)
-        else:
-            period_start = date(year, month, day)
-
     # Simpler approach: calculate directly
     if d.month > 3:
         # April to December
@@ -85,6 +70,29 @@ def detect_tax_period(payment_date_str: str) -> int:
         elif d.month == 3:
             return 12 if d.day >= 6 else 11
     return 1
+
+
+def detect_tax_week(payment_date_str: str) -> int:
+    """
+    Determine tax week (1-53) from payment date.
+    Tax week 1 starts April 6.
+    """
+    try:
+        d = datetime.strptime(payment_date_str, "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return 1
+
+    # Find the start of the tax year (April 6)
+    if d.month > 4 or (d.month == 4 and d.day >= 6):
+        tax_year_start = date(d.year, 4, 6)
+    elif d.month == 4 and d.day < 6:
+        tax_year_start = date(d.year - 1, 4, 6)
+    else:
+        tax_year_start = date(d.year - 1, 4, 6)
+
+    days_elapsed = (d - tax_year_start).days
+    week = (days_elapsed // 7) + 1
+    return max(1, min(week, 53))
 
 
 # ---------------------------------------------------------------------------
@@ -226,9 +234,16 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
 
     # --- Determine tax year and period ---
     tax_year = detect_tax_year(payslip.payment_date)
-    tax_period = payslip.tax_period or detect_tax_period(payslip.payment_date)
     frequency = payslip.pay_frequency.value \
         if payslip.pay_frequency != PayFrequency.UNKNOWN else "monthly"
+
+    # Detect period number based on frequency
+    if payslip.tax_period:
+        tax_period = payslip.tax_period
+    elif frequency == "weekly":
+        tax_period = detect_tax_week(payslip.payment_date)
+    else:
+        tax_period = detect_tax_period(payslip.payment_date)
 
     # --- Frequency conflict check ---
     freq_flag = check_frequency_conflict(
@@ -245,8 +260,32 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
     sacrifice_amt = gross["sacrifice_amount"]
     has_sacrifice = gross["has_sacrifice_line"]
 
-    # YTD gross for tax — use payslip YTD (cross-check only, not for calculation)
-    ytd_gross_for_tax = payslip.ytd.ytd_gross_for_tax or gross_for_tax
+    # --- SPECIAL ELEMENTS (Tronc, BIK, Redundancy, PILON) ---
+    special, special_flags = scan_special_elements(
+        payslip.pay_lines, gross_for_tax, gross_for_ni
+    )
+    flags.extend(special_flags)
+
+    # YTD gross for tax
+    # For weekly: if no YTD provided, use this period only (W1 emergency basis)
+    # For monthly: use payslip YTD for cumulative calculation
+    if payslip.ytd.ytd_gross_for_tax:
+        ytd_gross_for_tax = payslip.ytd.ytd_gross_for_tax
+    else:
+        # No YTD — treat as period 1 / emergency basis
+        ytd_gross_for_tax = gross_for_tax
+        if tax_period > 1:
+            flags.append(Flag(
+                severity=FlagSeverity.WARNING,
+                element_code="TAX",
+                code="NO_YTD_DATA",
+                message=(
+                    "No year-to-date figures were found on your payslip. "
+                    "We've calculated tax on this period only — for a fully "
+                    "accurate cumulative result, please provide a payslip "
+                    "that includes YTD totals."
+                ),
+            ))
 
     # --- TAX CALCULATION ---
     tax_breakdown = calculate_tax(
@@ -363,9 +402,63 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
                 ),
             ))
 
+        # --- STATUTORY PAY PENSION CHECK ---
+        pension_type_str = "SALARY_SACRIFICE" if has_sacrifice else "NON_SAL_SAC"
+        stat_flags, has_parental, stat_pay_amt, other_pensionable = \
+            validate_stat_pay_pension(
+                pay_lines=payslip.pay_lines,
+                ee_pension_shown=payslip.pension.ee_contribution_shown or 0,
+                er_pension_shown=payslip.pension.er_contribution_shown or 0,
+                sacrifice_amount=sacrifice_amt,
+                pension_type=pension_type_str,
+                payslip_frequency=frequency,
+            )
+        flags.extend(stat_flags)
+
+        # If parental pay found — store flag for Stage 2 prompt in app.py
+        if has_parental:
+            flags.append(Flag(
+                severity=FlagSeverity.INFO,
+                element_code="STAT_PAY",
+                code="PARENTAL_PAY_STAGE2_PROMPT",
+                message="PARENTAL_PAY_DETECTED",  # Sentinel — app.py shows Stage 2 prompt
+            ))
+
+    # --- STUDENT LOAN ---
+    student_loan_deduction = 0.0
+    student_loan_lines = [
+        line for line in payslip.pay_lines
+        if line.element_code in ("B1", "B2")
+    ]
+    if student_loan_lines:
+        for sl_line in student_loan_lines:
+            plan = "PGL" if sl_line.element_code == "B2" else None
+            # Try to identify plan from description
+            desc_lower = sl_line.description.lower()
+            if "plan 1" in desc_lower or "plan1" in desc_lower:
+                plan = "Plan1"
+            elif "plan 2" in desc_lower or "plan2" in desc_lower:
+                plan = "Plan2"
+            elif "plan 4" in desc_lower or "plan4" in desc_lower:
+                plan = "Plan4"
+            elif "plan 5" in desc_lower or "plan5" in desc_lower:
+                plan = "Plan5"
+            elif "postgrad" in desc_lower or "pgl" in desc_lower:
+                plan = "PGL"
+
+            sl_flags = validate_student_loan(
+                ni_able_earnings=gross_for_ni,
+                deduction_shown=abs(sl_line.amount),
+                plan=plan,
+                tax_year=tax_year,
+                frequency=frequency,
+            )
+            flags.extend(sl_flags)
+            student_loan_deduction += abs(sl_line.amount)
+
     # --- NET PAY ---
     net_pay_expected = round(
-        gross_for_tax - tax_expected - ee_ni_expected, 2
+        gross_for_tax - tax_expected - ee_ni_expected - student_loan_deduction, 2
     )
     net_pay_shown = payslip.summary.net_pay or 0.0
     net_pay_variance = round(abs(net_pay_expected - net_pay_shown), 2)
