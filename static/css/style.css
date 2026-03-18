@@ -556,15 +556,19 @@ select option { background: #2a2a2a; color: #ffffff; }
 select, input[type="text"], input[type="number"],
 input[type="date"], input[type="email"] {
   width: 100%; padding: 0.65rem 0.9rem;
-  border: 1.5px solid var(--grey-200); border-radius: 8px;
-  font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
-  color: var(--grey-800); background: var(--white);
+  border: 1.5px solid #333336; border-radius: 8px;
+  font-family: 'Sora', sans-serif; font-size: 0.95rem;
+  color: #ffffff; background: #1a1a1a;
   transition: border-color 0.2s;
   appearance: none;
+  color-scheme: dark;
 }
 select:focus, input:focus {
-  outline: none; border-color: var(--teal);
-  box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+  outline: none; border-color: #ff4500;
+  box-shadow: 0 0 0 3px rgba(255,69,0,0.15);
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); cursor: pointer;
 }
 .inline-pair {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
