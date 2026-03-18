@@ -110,12 +110,74 @@ def questions():
 
     # GET — pass saved answers back to template so they're pre-filled
     answers = session.get("user_answers", {})
-    return render_template("questions.html", answers=answers)
+    validation_errors = session.pop("validation_errors", [])
+    return render_template("questions.html", answers=answers, validation_errors=validation_errors)
 
 
 @app.route("/questions/summary")
 def questions_summary():
     answers = session.get("user_answers", {})
+
+    # Server-side validation — check for incomplete required answers
+    missing = []
+
+    def requires(field, label):
+        if not answers.get(field):
+            missing.append(label)
+
+    # Always required
+    requires("pay_frequency", "How often you are paid")
+    requires("pension_enrolled", "Are you enrolled in your workplace pension")
+    requires("min_wage_check", "Minimum wage check")
+
+    if answers.get("pension_enrolled") == "yes":
+        requires("pension_provider", "Pension provider")
+        requires("knows_min_contribution", "Do you know your minimum contribution")
+        if answers.get("knows_min_contribution") == "yes":
+            has_contribution = (
+                answers.get("ee_min_pct") or answers.get("ee_min_gbp") or
+                answers.get("ee_total_pct") or answers.get("ee_total_gbp")
+            )
+            if not has_contribution:
+                missing.append("Your pension contribution amount or percentage")
+        requires("er_matching_type", "Do you know your employer minimum contribution")
+        if answers.get("er_matching_type") in ("a", "b"):
+            requires("er_min_pct", "Employer minimum contribution percentage")
+        if answers.get("er_matching_type") == "b":
+            requires("er_match_type", "How does your employer match your contribution")
+            if answers.get("er_match_type") == "up_to_max":
+                requires("er_match_max_pct", "Employer maximum match percentage")
+            if answers.get("er_match_type") in ("pct_above", "pct_below"):
+                requires("er_match_diff_pct", "Employer match percentage difference")
+
+    if answers.get("min_wage_check") == "yes":
+        requires("date_of_birth", "Date of birth")
+        requires("contractual_hours", "Contractual weekly hours")
+        requires("had_time_off", "Did you have any time off")
+        if answers.get("had_time_off") == "yes":
+            requires("days_off", "Number of days off")
+        requires("is_apprentice", "Are you an apprentice")
+        if answers.get("is_apprentice") == "yes":
+            requires("apprentice_first_year", "First year of apprenticeship")
+        requires("early_start", "Required to start early")
+        requires("unpaid_overtime", "Unpaid overtime or lunch")
+        requires("travels_clients", "Travels between clients")
+        if answers.get("travels_clients") == "yes":
+            requires("travel_reimbursed", "Travel costs reimbursed")
+            requires("paid_travel_time", "Paid for travel time")
+            if answers.get("paid_travel_time") == "no":
+                requires("unpaid_travel_hours", "Unpaid travel hours")
+        requires("shift_rounding", "Shift times rounded down")
+        requires("unpaid_training", "Unpaid training")
+        requires("employer_records_hours", "Employer records hours")
+        requires("own_uniform", "Supplies own uniform")
+
+    if missing:
+        # Redirect back to questions with error message
+        session["validation_errors"] = missing
+        return redirect(url_for("questions"))
+
+    session.pop("validation_errors", None)
     return render_template("questions_summary.html", answers=answers)
 
 
