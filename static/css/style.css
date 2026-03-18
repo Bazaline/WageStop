@@ -293,8 +293,8 @@ select option { background: #2a2a2a; color: #ffffff; }
   border-color: #ff4500; background: #2a1a1a;
 }
 .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
-.upload-zone h3 { font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
-.upload-zone p   { font-size: 0.875rem; color: #888888; }
+.upload-zone h3 { font-weight: 700; color: #111111; margin-bottom: 0.5rem; }
+.upload-zone p   { font-size: 0.875rem; color: #555555; }
 .upload-zone input[type="file"] { display: none; }
 .upload-formats {
   margin-top: 1rem; font-size: 0.75rem; color: #666;

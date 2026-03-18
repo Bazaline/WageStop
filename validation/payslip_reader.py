@@ -6,6 +6,7 @@ Extracts all pay lines, metadata, and summary figures from uploaded payslips.
 
 import re
 import json
+import os
 import base64
 import anthropic
 from typing import Optional
@@ -18,6 +19,17 @@ except ImportError:
     PDF_AVAILABLE = False
 
 from .elements import classify_pay_lines, ELEMENT_CATEGORIES
+
+
+def get_client():
+    """Get Anthropic client with explicit API key from environment"""
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "ANTHROPIC_API_KEY environment variable is not set. "
+            "Please add it in Render → Environment Variables."
+        )
+    return anthropic.Anthropic(api_key=api_key)
 
 
 # ---------------------------------------------------------------------------
@@ -106,7 +118,7 @@ def extract_with_claude_vision(file_path: str) -> dict:
     Send payslip image or PDF to Claude vision API for extraction.
     Returns structured dict of payslip data.
     """
-    client = anthropic.Anthropic()
+    client = get_client()
     path = Path(file_path)
 
     if path.suffix.lower() == ".pdf":
@@ -225,7 +237,7 @@ def extract_with_claude_text(raw_text: str) -> dict:
     Send extracted PDF text to Claude for structured parsing.
     Used when pdfplumber successfully extracts text from a clean PDF.
     """
-    client = anthropic.Anthropic()
+    client = get_client()
 
     prompt = f"""You are a UK payroll expert. Parse this payslip text and return JSON only.
 
