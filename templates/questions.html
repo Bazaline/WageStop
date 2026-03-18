@@ -36,7 +36,7 @@
     <div class="question-card" id="q3-block" style="display:none">
       <h3>Who is your pension provider?</h3>
       <div class="form-group">
-        <select name="pension_provider">
+        <select name="pension_provider" id="pension_provider">
           <option value="unsure" {{ 'selected' if not answers.pension_provider }}>Unsure</option>
           <option value="Cushon" {{ 'selected' if answers.pension_provider == 'Cushon' }}>Cushon</option>
           <option value="Nest" {{ 'selected' if answers.pension_provider == 'Nest' }}>Nest</option>
@@ -216,7 +216,7 @@
         <h3>Are you still in your first year of your apprenticeship?</h3>
         <div class="info-tag">💡 This applies even if your apprenticeship was started with a different employer.</div>
         <div class="form-group">
-          <select name="apprentice_first_year">
+          <select name="apprentice_first_year" id="apprentice_first_year">
             <option value="" {{ 'selected' if not answers.apprentice_first_year }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.apprentice_first_year == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.apprentice_first_year == 'no' }}>No</option>
@@ -227,7 +227,7 @@
         <h3>Does your employer ever require you to come in earlier than your contracted hours?</h3>
         <div class="info-tag">💡 This could include signing into your computer, getting changed into a uniform, putting on PPE, or carrying out security checks.</div>
         <div class="form-group">
-          <select name="early_start">
+          <select name="early_start" id="early_start">
             <option value="" {{ 'selected' if not answers.early_start }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.early_start == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.early_start == 'no' }}>No</option>
@@ -237,7 +237,7 @@
       <div class="question-card">
         <h3>Does your employer require you to work over your lunch break or after work without paying you?</h3>
         <div class="form-group">
-          <select name="unpaid_overtime">
+          <select name="unpaid_overtime" id="unpaid_overtime">
             <option value="" {{ 'selected' if not answers.unpaid_overtime }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.unpaid_overtime == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.unpaid_overtime == 'no' }}>No</option>
@@ -258,7 +258,7 @@
         <h3>Are you reimbursed for your travel costs?</h3>
         <div class="info-tag">💡 Excluding travelling to and from home.</div>
         <div class="form-group">
-          <select name="travel_reimbursed">
+          <select name="travel_reimbursed" id="travel_reimbursed">
             <option value="" {{ 'selected' if not answers.travel_reimbursed }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.travel_reimbursed == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.travel_reimbursed == 'no' }}>No</option>
@@ -285,7 +285,7 @@
       <div class="question-card">
         <h3>Are your shift times rounded down?</h3>
         <div class="form-group">
-          <select name="shift_rounding">
+          <select name="shift_rounding" id="shift_rounding">
             <option value="" {{ 'selected' if not answers.shift_rounding }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.shift_rounding == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.shift_rounding == 'no' }}>No</option>
@@ -296,7 +296,7 @@
       <div class="question-card">
         <h3>Does your employer require you to do unpaid training?</h3>
         <div class="form-group">
-          <select name="unpaid_training">
+          <select name="unpaid_training" id="unpaid_training">
             <option value="" {{ 'selected' if not answers.unpaid_training }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.unpaid_training == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.unpaid_training == 'no' }}>No</option>
@@ -307,7 +307,7 @@
       <div class="question-card">
         <h3>Does your employer keep a record of your actual hours worked in each pay period?</h3>
         <div class="form-group">
-          <select name="employer_records_hours">
+          <select name="employer_records_hours" id="employer_records_hours">
             <option value="" {{ 'selected' if not answers.employer_records_hours }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.employer_records_hours == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.employer_records_hours == 'no' }}>No</option>
@@ -319,7 +319,7 @@
         <h3>Do you supply your own uniform?</h3>
         <div class="info-tag">💡 This can include shoes or business-related coloured clothing required by your employer.</div>
         <div class="form-group">
-          <select name="own_uniform">
+          <select name="own_uniform" id="own_uniform">
             <option value="" {{ 'selected' if not answers.own_uniform }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.own_uniform == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.own_uniform == 'no' }}>No</option>
@@ -342,7 +342,7 @@
       <div class="question-card" id="clothing-reimbursed-block" style="{{ 'display:block' if answers.own_specialist_clothing == 'yes' else 'display:none' }}">
         <h3>Are you reimbursed for these clothing costs?</h3>
         <div class="form-group">
-          <select name="clothing_reimbursed">
+          <select name="clothing_reimbursed" id="clothing_reimbursed">
             <option value="" {{ 'selected' if not answers.clothing_reimbursed }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.clothing_reimbursed == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.clothing_reimbursed == 'no' }}>No</option>
@@ -365,7 +365,7 @@
       <div class="question-card" id="tools-reimbursed-block" style="{{ 'display:block' if answers.own_tools == 'yes' else 'display:none' }}">
         <h3>Are you reimbursed for your tool purchases?</h3>
         <div class="form-group">
-          <select name="tools_reimbursed">
+          <select name="tools_reimbursed" id="tools_reimbursed">
             <option value="" {{ 'selected' if not answers.tools_reimbursed }}>— Select —</option>
             <option value="yes" {{ 'selected' if answers.tools_reimbursed == 'yes' }}>Yes</option>
             <option value="no" {{ 'selected' if answers.tools_reimbursed == 'no' }}>No</option>
@@ -499,6 +499,27 @@ cFields.forEach(function(id) {
 });
 
 initVisibility();
+
+// ---- CLEAR ERRORS ON INPUT ----
+document.querySelectorAll('input, select').forEach(function(el) {
+  el.addEventListener('input', function() { this.classList.remove('field-error'); });
+  el.addEventListener('change', function() { this.classList.remove('field-error'); });
+});
+
+// ---- CLEAR ALL CONTRIBUTION FIELDS TOGETHER ----
+// As soon as any contribution field has a value, clear red from all of them
+const allContribFields = ['ee_min_pct','ee_min_gbp','ee_additional_pct','ee_additional_gbp','ee_total_pct','ee_total_gbp'];
+allContribFields.forEach(function(id) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() {
+    if (this.value.trim()) {
+      allContribFields.forEach(function(fid) {
+        const f = document.getElementById(fid);
+        if (f) f.classList.remove('field-error');
+      });
+    }
+  });
+});
 
 // Clear red highlight as soon as user interacts with a field
 document.querySelectorAll('select, input').forEach(function(el) {
