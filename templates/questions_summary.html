@@ -3,13 +3,16 @@
 {% block content %}
 <div class="page-header">
   <h1>Your Answers</h1>
-  <p>Here's a summary of what you've told us. You can go back and change anything.</p>
+  <p>Here's a summary of what you've told us. You can edit any section before continuing.</p>
 </div>
 
 <div class="summary-wrap">
 
   <div class="summary-card">
-    <h3>Pay</h3>
+    <div class="summary-card-header">
+      <h3>Pay</h3>
+      <a href="{{ url_for('questions') }}" class="edit-btn">Edit</a>
+    </div>
     <div class="summary-row">
       <span>How often you're paid</span>
       <span>{{ answers.pay_frequency | title if answers.pay_frequency and answers.pay_frequency != 'unsure' else 'Not specified' }}</span>
@@ -17,7 +20,10 @@
   </div>
 
   <div class="summary-card">
-    <h3>Pension</h3>
+    <div class="summary-card-header">
+      <h3>Pension</h3>
+      <a href="{{ url_for('questions') }}" class="edit-btn">Edit</a>
+    </div>
     <div class="summary-row">
       <span>Enrolled in workplace pension</span>
       <span>{{ answers.pension_enrolled | title if answers.pension_enrolled else 'Not answered' }}</span>
@@ -28,147 +34,58 @@
       <span>{{ answers.pension_provider }}</span>
     </div>
     {% endif %}
-    {% if answers.knows_min_contribution %}
-    <div class="summary-row">
-      <span>Knows minimum contribution</span>
-      <span>{{ answers.knows_min_contribution | title }}</span>
-    </div>
-    {% endif %}
     {% if answers.ee_total_pct %}
-    <div class="summary-row">
-      <span>Your total contribution (%)</span>
-      <span>{{ answers.ee_total_pct }}%</span>
-    </div>
+    <div class="summary-row"><span>Your total contribution</span><span>{{ answers.ee_total_pct }}%</span></div>
     {% elif answers.ee_total_gbp %}
-    <div class="summary-row">
-      <span>Your total contribution (£)</span>
-      <span>£{{ answers.ee_total_gbp }}</span>
-    </div>
+    <div class="summary-row"><span>Your total contribution</span><span>£{{ answers.ee_total_gbp }}</span></div>
     {% else %}
-      {% if answers.ee_min_pct %}
-      <div class="summary-row">
-        <span>Your minimum contribution (%)</span>
-        <span>{{ answers.ee_min_pct }}%</span>
-      </div>
-      {% endif %}
-      {% if answers.ee_min_gbp %}
-      <div class="summary-row">
-        <span>Your minimum contribution (£)</span>
-        <span>£{{ answers.ee_min_gbp }}</span>
-      </div>
-      {% endif %}
-      {% if answers.ee_additional_pct %}
-      <div class="summary-row">
-        <span>Your additional contribution (%)</span>
-        <span>{{ answers.ee_additional_pct }}%</span>
-      </div>
-      {% endif %}
-      {% if answers.ee_additional_gbp %}
-      <div class="summary-row">
-        <span>Your additional contribution (£)</span>
-        <span>£{{ answers.ee_additional_gbp }}</span>
-      </div>
-      {% endif %}
-    {% endif %}
-    {% if answers.er_matching_type %}
-    <div class="summary-row">
-      <span>Employer contribution known</span>
-      <span>{{ {'a':'Yes','b':'Yes (with matching)','c':'No','d':'Unsure'}.get(answers.er_matching_type, answers.er_matching_type) }}</span>
-    </div>
+      {% if answers.ee_min_pct %}<div class="summary-row"><span>Your minimum contribution</span><span>{{ answers.ee_min_pct }}%</span></div>{% endif %}
+      {% if answers.ee_min_gbp %}<div class="summary-row"><span>Your minimum contribution</span><span>£{{ answers.ee_min_gbp }}</span></div>{% endif %}
+      {% if answers.ee_additional_pct %}<div class="summary-row"><span>Your additional contribution</span><span>{{ answers.ee_additional_pct }}%</span></div>{% endif %}
+      {% if answers.ee_additional_gbp %}<div class="summary-row"><span>Your additional contribution</span><span>£{{ answers.ee_additional_gbp }}</span></div>{% endif %}
     {% endif %}
     {% if answers.er_min_pct %}
-    <div class="summary-row">
-      <span>Employer minimum contribution</span>
-      <span>{{ answers.er_min_pct }}%</span>
-    </div>
+    <div class="summary-row"><span>Employer minimum contribution</span><span>{{ answers.er_min_pct }}%</span></div>
     {% endif %}
     {% if answers.er_match_type and answers.er_match_type not in ('', 'unsure') %}
     <div class="summary-row">
-      <span>Employer matching type</span>
-      <span>{{ {
-        'full_match': 'Matches with no cap',
-        'up_to_max': 'Matches up to a max %',
-        'pct_above': 'Set % above contribution',
-        'pct_below': 'Set % below contribution',
-        'unsure': 'Unsure'
-      }.get(answers.er_match_type, answers.er_match_type) }}</span>
-    </div>
-    {% endif %}
-    {% if answers.er_match_max_pct %}
-    <div class="summary-row">
-      <span>Employer max match %</span>
-      <span>{{ answers.er_match_max_pct }}%</span>
-    </div>
-    {% endif %}
-    {% if answers.er_match_diff_pct %}
-    <div class="summary-row">
-      <span>Contribution difference %</span>
-      <span>{{ answers.er_match_diff_pct }}%</span>
+      <span>Employer matching</span>
+      <span>{{ {'up_to_max':'Matches up to a max %','pct_higher':'Set % higher','pct_lower':'Set % lower'}.get(answers.er_match_type, answers.er_match_type) }}{% if answers.er_match_pct %} ({{ answers.er_match_pct }}%){% endif %}</span>
     </div>
     {% endif %}
   </div>
 
   <div class="summary-card">
-    <h3>Minimum Wage Check</h3>
+    <div class="summary-card-header">
+      <h3>Minimum Wage Check</h3>
+      <a href="{{ url_for('questions') }}" class="edit-btn">Edit</a>
+    </div>
     <div class="summary-row">
       <span>Minimum wage check requested</span>
       <span>{{ 'Yes' if answers.min_wage_check == 'yes' else 'No' }}</span>
     </div>
     {% if answers.min_wage_check == 'yes' %}
-      {% if answers.date_of_birth %}
-      <div class="summary-row"><span>Date of birth</span><span>{{ answers.date_of_birth }}</span></div>
-      {% endif %}
-      {% if answers.contractual_hours %}
-      <div class="summary-row"><span>Contractual weekly hours</span><span>{{ answers.contractual_hours }}</span></div>
-      {% endif %}
-      {% if answers.had_time_off %}
-      <div class="summary-row"><span>Time off this period</span><span>{{ answers.had_time_off | title }}{% if answers.days_off and answers.had_time_off == 'yes' %} — {{ answers.days_off }} day(s){% endif %}</span></div>
-      {% endif %}
-      {% if answers.hours_worked %}
-      <div class="summary-row"><span>Hours worked this period</span><span>{{ answers.hours_worked }}</span></div>
-      {% endif %}
-      {% if answers.is_apprentice %}
-      <div class="summary-row"><span>Apprentice</span><span>{{ answers.is_apprentice | title }}</span></div>
-      {% endif %}
-      {% if answers.apprentice_first_year %}
-      <div class="summary-row"><span>First year of apprenticeship</span><span>{{ answers.apprentice_first_year | title }}</span></div>
-      {% endif %}
-      {% if answers.early_start %}
-      <div class="summary-row"><span>Required to start early</span><span>{{ answers.early_start | title }}</span></div>
-      {% endif %}
-      {% if answers.unpaid_overtime %}
-      <div class="summary-row"><span>Unpaid overtime / lunch</span><span>{{ answers.unpaid_overtime | title }}</span></div>
-      {% endif %}
-      {% if answers.travels_clients %}
-      <div class="summary-row"><span>Travels between clients</span><span>{{ answers.travels_clients | title }}</span></div>
-      {% endif %}
-      {% if answers.travel_reimbursed %}
-      <div class="summary-row"><span>Travel reimbursed</span><span>{{ answers.travel_reimbursed | title }}</span></div>
-      {% endif %}
-      {% if answers.paid_travel_time %}
-      <div class="summary-row"><span>Paid for travel time</span><span>{{ answers.paid_travel_time | title }}</span></div>
-      {% endif %}
-      {% if answers.unpaid_travel_hours %}
-      <div class="summary-row"><span>Unpaid travel hours</span><span>{{ answers.unpaid_travel_hours }}</span></div>
-      {% endif %}
-      {% if answers.shift_rounding %}
-      <div class="summary-row"><span>Shift times rounded down</span><span>{{ answers.shift_rounding | title }}</span></div>
-      {% endif %}
-      {% if answers.unpaid_training %}
-      <div class="summary-row"><span>Unpaid training required</span><span>{{ answers.unpaid_training | title }}</span></div>
-      {% endif %}
-      {% if answers.employer_records_hours %}
-      <div class="summary-row"><span>Employer records hours</span><span>{{ answers.employer_records_hours | title }}</span></div>
-      {% endif %}
-      {% if answers.own_uniform %}
-      <div class="summary-row"><span>Supplies own uniform</span><span>{{ answers.own_uniform | title }}</span></div>
-      {% endif %}
+      {% if answers.date_of_birth %}<div class="summary-row"><span>Date of birth</span><span>{{ answers.date_of_birth }}</span></div>{% endif %}
+      {% if answers.contractual_hours %}<div class="summary-row"><span>Contractual weekly hours</span><span>{{ answers.contractual_hours }}</span></div>{% endif %}
+      {% if answers.had_time_off %}<div class="summary-row"><span>Time off this period</span><span>{{ answers.had_time_off | title }}{% if answers.days_off and answers.had_time_off == 'yes' %} — {{ answers.days_off }} day(s){% endif %}</span></div>{% endif %}
+      {% if answers.is_apprentice %}<div class="summary-row"><span>Apprentice</span><span>{{ answers.is_apprentice | title }}</span></div>{% endif %}
+      {% if answers.apprentice_first_year %}<div class="summary-row"><span>First year of apprenticeship</span><span>{{ answers.apprentice_first_year | title }}</span></div>{% endif %}
+      {% if answers.early_start %}<div class="summary-row"><span>Required to start early</span><span>{{ answers.early_start | title }}</span></div>{% endif %}
+      {% if answers.unpaid_overtime %}<div class="summary-row"><span>Unpaid overtime / lunch</span><span>{{ answers.unpaid_overtime | title }}</span></div>{% endif %}
+      {% if answers.travels_clients %}<div class="summary-row"><span>Travels between clients</span><span>{{ answers.travels_clients | title }}</span></div>{% endif %}
+      {% if answers.travel_reimbursed %}<div class="summary-row"><span>Travel reimbursed</span><span>{{ answers.travel_reimbursed | title }}</span></div>{% endif %}
+      {% if answers.paid_travel_time %}<div class="summary-row"><span>Paid for travel time</span><span>{{ answers.paid_travel_time | title }}</span></div>{% endif %}
+      {% if answers.unpaid_travel_hours %}<div class="summary-row"><span>Unpaid travel hours</span><span>{{ answers.unpaid_travel_hours }}</span></div>{% endif %}
+      {% if answers.shift_rounding %}<div class="summary-row"><span>Shift times rounded down</span><span>{{ answers.shift_rounding | title }}</span></div>{% endif %}
+      {% if answers.unpaid_training %}<div class="summary-row"><span>Unpaid training required</span><span>{{ answers.unpaid_training | title }}</span></div>{% endif %}
+      {% if answers.employer_records_hours %}<div class="summary-row"><span>Employer records hours</span><span>{{ answers.employer_records_hours | title }}</span></div>{% endif %}
+      {% if answers.own_uniform %}<div class="summary-row"><span>Supplies own uniform</span><span>{{ answers.own_uniform | title }}</span></div>{% endif %}
     {% endif %}
   </div>
 
   <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
     <a href="{{ url_for('upload') }}" class="btn btn-primary btn-large">Continue to Upload</a>
-    <a href="{{ url_for('questions') }}" class="btn btn-ghost">Go Back &amp; Change Answers</a>
+    <a href="{{ url_for('questions') }}" class="btn btn-ghost">Edit All Answers</a>
   </div>
 
 </div>

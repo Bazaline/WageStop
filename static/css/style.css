@@ -506,20 +506,33 @@ select option { background: #2a2a2a; color: #ffffff; }
   max-width: 680px; margin: 3rem auto; padding: 0 1.5rem 4rem;
 }
 .summary-card {
-  background: #222222; border-radius: var(--radius);
-  border: 1px solid #333336; padding: 1.5rem;
+  background: #ffffff; border-radius: var(--radius);
+  border: 1px solid #dddddd; padding: 1.5rem;
   margin-bottom: 1rem; box-shadow: var(--shadow);
 }
-.summary-card h3 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 1px; color: #666666; margin-bottom: 0.75rem; }
+.summary-card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.75rem;
+}
+.summary-card h3 {
+  font-size: 0.8rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: #888888; margin: 0;
+}
+.summary-card .edit-btn {
+  font-size: 0.75rem; font-weight: 700; color: #ff4500;
+  text-decoration: none; border: 1.5px solid #ff4500;
+  border-radius: 5px; padding: 0.2rem 0.6rem;
+  transition: all 0.2s;
+}
+.summary-card .edit-btn:hover { background: #ff4500; color: #fff; }
 .summary-row {
   display: flex; justify-content: space-between;
-  padding: 0.4rem 0; font-size: 0.9rem;
-  border-bottom: 1px solid #2a2a2a;
+  padding: 0.45rem 0; font-size: 0.9rem;
+  border-bottom: 1px solid #eeeeee;
 }
 .summary-row:last-child { border-bottom: none; }
-.summary-row span:first-child { color: #888888; }
-.summary-row span:last-child  { font-weight: 600; color: #fff; }
+.summary-row span:first-child { color: #555555; }
+.summary-row span:last-child  { font-weight: 600; color: #111111; }
 
 /* --- PAYSLIP MOCK --- */
 .payslip-mock {
