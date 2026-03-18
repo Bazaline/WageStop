@@ -769,18 +769,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 0.75rem;
 }
-.pension-link {
-  display: flex; align-items: center; gap: 0.5rem;
-  background: var(--grey-50); border: 1px solid var(--grey-200);
-  border-radius: 8px; padding: 0.75rem;
-  text-decoration: none; color: var(--grey-800);
-  font-size: 0.875rem; font-weight: 600;
-  transition: all 0.2s;
-}
-.pension-link:hover {
-  border-color: var(--teal); color: var(--teal); background: #f0fdfa;
-}
-
 /* --- SUMMARY PAGE --- */
 .summary-wrap {
   max-width: 680px; margin: 3rem auto; padding: 0 1.5rem 4rem;
