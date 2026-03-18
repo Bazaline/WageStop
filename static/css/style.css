@@ -252,15 +252,23 @@ input[type="date"], input[type="email"] {
   width: 100%; padding: 0.65rem 0.9rem;
   border: 1.5px solid #333336; border-radius: 8px;
   font-family: 'Sora', sans-serif; font-size: 0.95rem;
-  color: #ffffff; background: #1a1a1a;
+  color: #ffffff; background: #2a2a2a;
   transition: border-color 0.2s;
   appearance: none;
+  -webkit-appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23ff4500' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.9rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
 }
 select:focus, input:focus {
   outline: none; border-color: #ff4500;
   box-shadow: 0 0 0 3px rgba(255,69,0,0.15);
 }
-select option { background: #1a1a1a; color: #fff; }
+select option { background: #2a2a2a; color: #ffffff; }
 .inline-pair {
   display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
 }
@@ -467,30 +475,30 @@ select option { background: #1a1a1a; color: #fff; }
 
 /* --- PAYSLIP MOCK --- */
 .payslip-mock {
-  background: #222222;
+  background: #ffffff;
   border-radius: 14px;
   padding: 1.75rem;
   box-shadow: var(--shadow-lg);
-  color: #ffffff;
+  color: #111111;
   min-width: 280px;
-  border: 1px solid #333336;
+  border: 1px solid #eeeeee;
 }
 .mock-header, .mock-row {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 0.5rem 0; font-size: 0.95rem;
+  padding: 0.5rem 0; font-size: 0.95rem; color: #111111;
 }
-.mock-header { font-weight: 700; border-bottom: 1px solid #333336; margin-bottom: 0.25rem; }
+.mock-header { font-weight: 700; border-bottom: 1px solid #eeeeee; margin-bottom: 0.25rem; }
 .mock-val { font-weight: 600; }
-.mock-red  { color: #f87171; }
-.mock-green { color: #4ade80; }
-.mock-divider { height: 1px; background: #333336; margin: 0.75rem 0; }
-.mock-net { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; }
+.mock-red  { color: #ef4444; }
+.mock-green { color: #16a34a; }
+.mock-divider { height: 1px; background: #eeeeee; margin: 0.75rem 0; }
+.mock-net { display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700; color: #111111; }
 .mock-badge {
   margin-top: 1rem; text-align: center;
   font-size: 0.8rem; font-weight: 700; padding: 0.4rem 0.8rem;
   border-radius: 6px;
 }
-.mock-badge--ok { background: #1a3a1a; color: #4ade80; }
+.mock-badge--ok { background: #dcfce7; color: #166534; }
 
 /* --- FOOTER --- */
 .footer {
