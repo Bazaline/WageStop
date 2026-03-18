@@ -127,21 +127,39 @@ body {
 
 /* --- HERO CHECKLIST --- */
 .hero-checklist {
-  display: flex; flex-direction: column; gap: 0.75rem;
+  display: flex; flex-direction: column; gap: 0.6rem;
   margin-bottom: 1.75rem;
 }
 .hero-check-item {
-  display: flex; align-items: flex-start; gap: 0.875rem;
-  font-size: 1.05rem; color: #ffffff; line-height: 1.4;
+  font-size: 1.05rem; color: #cccccc; line-height: 1.4;
+  padding-left: 0.25rem;
 }
-.hero-check {
-  font-family: 'Segoe UI', 'Apple Color Emoji', sans-serif;
-  font-size: 1.75rem;
-  line-height: 1;
+
+/* --- MOCK TICK & CROSS --- */
+.mock-tick {
+  font-size: 1.6rem;
   color: #4ade80;
-  flex-shrink: 0;
-  margin-top: -0.1rem;
-  filter: drop-shadow(0 0 4px rgba(74,222,128,0.4));
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 4px;
+  display: inline-block;
+  transform: rotate(-5deg);
+  filter: drop-shadow(0 0 3px rgba(74,222,128,0.5));
+}
+.mock-cross {
+  font-size: 1.5rem;
+  color: #f87171;
+  font-weight: 900;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 4px;
+  display: inline-block;
+}
+.mock-badge--error {
+  margin-top: 1rem; text-align: center;
+  font-size: 0.85rem; font-weight: 700; padding: 0.4rem 0.8rem;
+  border-radius: 6px; background: #3a1010; color: #f87171;
 }
 
 /* Payslip mock */
