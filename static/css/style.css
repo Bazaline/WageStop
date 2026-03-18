@@ -237,7 +237,7 @@ body {
   margin-bottom: 1rem;
 }
 .question-card .info-tag {
-  font-size: 0.8rem; color: #cccccc;
+  font-size: 0.8rem; color: #eeeeee;
   background: #2a2a2a; border-radius: 6px;
   padding: 0.5rem 0.75rem; margin-bottom: 1rem;
   border-left: 3px solid #ff4500;
@@ -424,26 +424,48 @@ select option { background: #2a2a2a; color: #ffffff; }
 
 /* --- CONTACTS --- */
 .contacts-wrap {
-  max-width: 800px; margin: 2rem auto; padding: 0 1.5rem 4rem;
+  max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem 4rem;
+}
+.contacts-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.contacts-col-heading {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.1rem; font-weight: 800;
+  color: #ffffff; margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #ff4500;
 }
 .contact-card {
   background: #222222; border: 1px solid #333336;
-  border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem;
+  border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem;
   box-shadow: var(--shadow);
 }
-.contact-card h3 { font-weight: 700; color: #ffffff; margin-bottom: 0.75rem; }
+.contact-card h3 { font-weight: 700; color: #ffffff; margin-bottom: 0.5rem; font-size: 0.95rem; }
 .contact-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-top: 0.5rem; }
 .contact-item { font-size: 0.875rem; color: #cccccc; }
+.contact-item span { color: #888888; font-size: 0.8rem; display: block; margin-bottom: 0.2rem; }
 .contact-item a { color: #ff4500; text-decoration: none; font-weight: 600; }
 .contact-item a:hover { text-decoration: underline; }
-.contact-item span { color: #666666; font-size: 0.8rem; display: block; }
+.link-btn {
+  display: inline-block;
+  color: #ff4500; font-weight: 600; font-size: 0.875rem;
+  text-decoration: none; border: 1px solid #ff4500;
+  border-radius: 6px; padding: 0.4rem 0.9rem;
+  transition: all 0.2s;
+}
+.link-btn:hover { background: #ff4500; color: #fff; }
 .pension-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 0.75rem;
 }
 .pension-link {
   display: flex; align-items: center; gap: 0.5rem;
-  background: #ffffff; border: 1px solid #333336;
+  background: #ffffff; border: 1px solid #cccccc;
   border-radius: 8px; padding: 0.75rem;
   text-decoration: none; color: #111111;
   font-size: 0.875rem; font-weight: 600;
@@ -451,6 +473,9 @@ select option { background: #2a2a2a; color: #ffffff; }
 }
 .pension-link:hover {
   border-color: #ff4500; color: #ff4500; background: #fff5f0;
+}
+@media (max-width: 768px) {
+  .contacts-columns { grid-template-columns: 1fr; }
 }
 
 /* --- SUMMARY PAGE --- */
@@ -543,10 +568,10 @@ select option { background: #2a2a2a; color: #ffffff; }
   margin-bottom: 1rem;
 }
 .question-card .info-tag {
-  font-size: 0.8rem; color: var(--grey-600);
-  background: var(--grey-100); border-radius: 6px;
+  font-size: 0.8rem; color: #eeeeee;
+  background: #2a2a2a; border-radius: 6px;
   padding: 0.5rem 0.75rem; margin-bottom: 1rem;
-  border-left: 3px solid var(--teal);
+  border-left: 3px solid #ff4500;
 }
 .form-group { margin-bottom: 1rem; }
 .form-group label {
