@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Wagestop{% endblock %}</title>
+  <title>{% block title %}PayScan{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Barlow+Condensed:wght@700;800&family=Cormorant+Garamond:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
   <nav class="nav">
-    <a href="{{ url_for('home') }}" class="nav-logo">Wage<span>stop</span></a>
+    <a href="{{ url_for('home') }}" class="nav-logo">
+      <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
+    </a>
     <div class="nav-links">
       <a href="{{ url_for('home') }}">Home</a>
       <a href="{{ url_for('upload') }}">Scan Payslip</a>
@@ -28,14 +30,16 @@
 
   <footer class="footer">
     <div class="footer-inner">
-      <p class="footer-logo">Wage<span>stop</span></p>
-      <p class="footer-tagline">Your payslip, explained.</p>
+      <p class="footer-logo">
+        <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
+      </p>
+      <p class="footer-tagline">where your pay matters</p>
       <div class="footer-links">
         <a href="{{ url_for('contacts') }}">Contacts & Links</a>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Use</a>
       </div>
-      <p class="footer-disclaimer">Wagestop provides information only and does not constitute financial or legal advice. Always consult a qualified professional for personalised guidance.</p>
+      <p class="footer-disclaimer">PayScan provides information only and does not constitute financial or legal advice. Always consult a qualified professional for personalised guidance.</p>
     </div>
   </footer>
 

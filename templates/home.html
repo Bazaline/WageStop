@@ -1,13 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Wagestop — Where your pay matters{% endblock %}
+{% block title %}PayScan — Where your pay matters{% endblock %}
 
 {% block content %}
 
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-text">
-      <h1 style="font-size:clamp(2.5rem,5vw,3.8rem);font-weight:800;letter-spacing:-2px;line-height:1.05;margin-bottom:0.4rem">WageStop</h1>
-      <p style="font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:600;color:#ff6a33;margin-bottom:2rem;letter-spacing:-0.3px">where your pay matters</p>
+      <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(3rem,6vw,5rem);font-weight:800;letter-spacing:2px;line-height:1;margin-bottom:0.4rem">
+        <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
+      </h1>
+      <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;font-weight:600;color:var(--muted);margin-bottom:2rem;letter-spacing:1px">where your pay matters</p>
 
       <div class="hero-checklist">
         <div class="hero-check-item">
@@ -24,7 +26,7 @@
         </div>
       </div>
 
-      <p class="hero-sub">Wagestop will give you a comprehensive breakdown of everything on your payslip and give you insight into what we find. We'll scan for common errors too and guide you through the next steps if we find any issues.</p>
+      <p class="hero-sub">PayScan will give you a comprehensive breakdown of everything on your payslip and give you insight into what we find. We'll scan for common errors too and guide you through the next steps if we find any issues.</p>
 
       <div class="hero-actions">
         <a href="{{ url_for('questions') }}" class="btn btn-primary btn-large">Get Started — It's Free</a>
