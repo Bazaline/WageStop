@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}PayScan{% endblock %}</title>
-  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <title>{% block title %}PayBlur{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Barlow+Condensed:wght@700;800&family=Cormorant+Garamond:ital,wght@1,400;1,600&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 
   <nav class="nav">
     <a href="{{ url_for('home') }}" class="nav-logo">
-      <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
+      <img src="{{ url_for('static', filename='img/payblur-logo.png') }}" alt="PayBlur" class="nav-logo-img">
     </a>
     <div class="nav-links">
       <a href="{{ url_for('home') }}">Home</a>
@@ -30,16 +30,16 @@
 
   <footer class="footer">
     <div class="footer-inner">
-      <p class="footer-logo">
-        <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
-      </p>
-      <p class="footer-tagline">where your pay matters</p>
+      <div class="footer-logo-wrap">
+        <img src="{{ url_for('static', filename='img/payblur-logo.png') }}" alt="PayBlur" class="footer-logo-img">
+      </div>
+      <p class="footer-tagline">Bringing your payslip into focus</p>
       <div class="footer-links">
         <a href="{{ url_for('contacts') }}">Contacts & Links</a>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Use</a>
       </div>
-      <p class="footer-disclaimer">PayScan provides information only and does not constitute financial or legal advice. Always consult a qualified professional for personalised guidance.</p>
+      <p class="footer-disclaimer">PayBlur provides information only and does not constitute financial or legal advice. Always consult a qualified professional for personalised guidance.</p>
     </div>
   </footer>
 

@@ -1,40 +1,32 @@
 {% extends "base.html" %}
-{% block title %}PayScan — Where your pay matters{% endblock %}
+{% block title %}PayBlur — Bringing your payslip into focus{% endblock %}
 
 {% block content %}
 
 <section class="hero">
   <div class="hero-inner">
     <div class="hero-text">
-      <h1 style="font-family:'Barlow Condensed',sans-serif;font-size:clamp(3rem,6vw,5rem);font-weight:800;letter-spacing:2px;line-height:1;margin-bottom:0.4rem">
-        <span class="logo-pay">PAY</span><span class="logo-dot">·</span><span class="logo-scan">SCAN</span>
-      </h1>
-      <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;font-weight:600;color:var(--muted);margin-bottom:2rem;letter-spacing:1px">where your pay matters</p>
+      <div class="hero-logo-wrap">
+        <img src="{{ url_for('static', filename='img/payblur-logo.png') }}" alt="PayBlur" class="hero-logo-img">
+      </div>
+      <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;font-weight:600;color:var(--muted);margin-bottom:2rem;letter-spacing:1px">Bringing your payslip into focus</p>
 
       <div class="hero-checklist">
-        <div class="hero-check-item">
-          <span>Ever wondered if your payslip is correct?</span>
-        </div>
-        <div class="hero-check-item">
-          <span>Unsure of what your tax code means?</span>
-        </div>
-        <div class="hero-check-item">
-          <span>Worried your pension contributions aren't right?</span>
-        </div>
-        <div class="hero-check-item">
-          <span>Want to know if items on your payslip are being taxed correctly?</span>
-        </div>
+        <div class="hero-check-item">Ever wondered if your payslip is correct?</div>
+        <div class="hero-check-item">Unsure of what your tax code means?</div>
+        <div class="hero-check-item">Worried your pension contributions aren't right?</div>
+        <div class="hero-check-item">Want to know if items on your payslip are being taxed correctly?</div>
       </div>
 
-      <p class="hero-sub">PayScan will give you a comprehensive breakdown of everything on your payslip and give you insight into what we find. We'll scan for common errors too and guide you through the next steps if we find any issues.</p>
+      <p class="hero-sub">PayBlur will give you a comprehensive breakdown of everything on your payslip and give you insight into what we find. We'll scan for common errors too and guide you through the next steps if we find any issues.</p>
 
       <div class="hero-actions">
         <a href="{{ url_for('questions') }}" class="btn btn-primary btn-large">Get Started — It's Free</a>
-        <a href="{{ url_for('upload') }}" class="btn btn-ghost">Skip to Upload</a>
       </div>
     </div>
     <div class="hero-visual">
       <div class="payslip-mock">
+        <div class="mock-scan-heading">Scan Results</div>
         <div class="mock-header">
           <span class="mock-label">Salary</span><span class="mock-val">£2,500.00</span>
         </div>
@@ -77,7 +69,7 @@
         <div class="feature-icon">⚡</div>
         <div class="feature-text">
           <h3>Instant Results</h3>
-          <p>Tax, NI and pension calculations checked in seconds.</p>
+          <p>Tax, National Insurance, your payments, deductions and pensions all checked for errors.</p>
         </div>
         <span class="feature-tag free">Free</span>
       </div>
