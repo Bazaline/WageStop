@@ -349,6 +349,10 @@ def calculate_tax(gross_for_tax: float,
     parsed = parse_tax_code(tax_code)
     config = TAX_CONFIG[tax_year]
 
+    # Guard against None tax_period
+    if not tax_period:
+        tax_period = 1
+
     # --- Flat rate codes ---
     if parsed["is_nt"]:
         return TaxBreakdown(
