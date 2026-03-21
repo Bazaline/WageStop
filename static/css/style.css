@@ -68,7 +68,7 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--purp
 
 .section-inner { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
 .features { padding: 5rem 2rem; background: #fff; }
-.features h2, .how-it-works h2 { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 3rem; color: var(--purple-dk); letter-spacing: -1px; }
+.features h2, .how-it-works h2 { font-family: 'Montserrat', sans-serif; font-size: 2rem; font-weight: 900; text-align: center; margin-bottom: 3rem; color: var(--purple-dk); letter-spacing: -1px; }
 .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; }
 .feature-card { display: flex; align-items: flex-start; gap: 1rem; background: var(--grey-100); border: 1px solid var(--lilac-mid); border-radius: var(--radius); padding: 1.25rem; position: relative; overflow: hidden; }
 .feature-icon { font-size: 1.5rem; flex-shrink: 0; }
@@ -88,7 +88,7 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--purp
 .cta-centre { text-align: center; }
 
 .page-header { background: var(--lilac); padding: 3rem 2rem; color: #fff; text-align: center; }
-.page-header h1 { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -1px; }
+.page-header h1 { font-family: 'Montserrat', sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: -1px; }
 .page-header p { color: rgba(255,255,255,0.85); margin-top: 0.5rem; }
 
 .questions-wrap { max-width: 680px; margin: 3rem auto; padding: 0 1.5rem 4rem; }
@@ -149,7 +149,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 
 .results-wrap { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
 .results-summary { background: var(--lilac); color: #fff; border-radius: var(--radius); padding: 2rem; margin-bottom: 1.5rem; }
-.results-summary h2 { font-family: 'Nunito', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 1.25rem; }
+.results-summary h2 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 900; margin-bottom: 1.25rem; }
 .summary-status { display: flex; align-items: center; gap: 0.75rem; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
 .status-ok    { color: #a8f0c6; }
 .status-error { color: var(--mustard); }
