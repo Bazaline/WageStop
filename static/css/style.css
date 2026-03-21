@@ -62,9 +62,6 @@ body { font-family: 'Nunito', sans-serif; background: #ffffff; color: var(--purp
 .hero-sub { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; max-width: 480px; line-height: 1.7; }
 .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
-.hero-checklist { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem; }
-.hero-check-item { font-size: 1.05rem; color: var(--purple-txt); line-height: 1.4; border-left: 3px solid var(--lilac-lt); padding-left: 10px; }
-
 .mock-tick { font-size: 1.6rem; color: var(--green); font-weight: 900; line-height: 1; vertical-align: middle; margin-left: 4px; display: inline-block; transform: rotate(-5deg); }
 .mock-cross { font-size: 1.5rem; color: var(--red); font-weight: 900; line-height: 1; vertical-align: middle; margin-left: 4px; display: inline-block; }
 .mock-badge--error { margin-top: 1rem; text-align: center; font-size: 0.85rem; font-weight: 700; padding: 0.4rem 0.8rem; border-radius: 8px; background: #fde8e8; color: #c0392b; }
@@ -245,12 +242,15 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 /* --- PAYBLUR LOGO --- */
 .nav-logo { display: flex; align-items: center; text-decoration: none; }
 .nav-logo-img { height: 36px; width: auto; }
-.hero-logo-wrap { margin-bottom: 0.5rem; }
-.hero-logo-img { height: 60px; width: auto; }
+.hero-logo-wrap { margin-bottom: 0.75rem; }
+.hero-logo-img { height: 100px; width: auto; }
 .footer-logo-wrap { margin-bottom: 0.5rem; }
 .footer-logo-img { height: 44px; width: auto; filter: brightness(0) invert(1); opacity: 0.9; }
 
-/* --- MOCK SCAN HEADING --- */
+/* --- CHECKLIST ICON --- */
+.hero-checklist { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem; }
+.hero-check-item { display: flex; align-items: center; gap: 0.6rem; font-size: 1.05rem; color: var(--purple-txt); line-height: 1.4; }
+.checklist-icon { width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0; object-fit: contain; }
 .mock-scan-heading {
   font-family: 'Nunito', sans-serif; font-size: 0.7rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: 2px; color: var(--lilac);
