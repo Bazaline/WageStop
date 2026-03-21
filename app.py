@@ -321,7 +321,7 @@ def analyse():
         import traceback
         error_detail = traceback.format_exc()
         return render_template("upload.html",
-            error=f"We couldn't complete the analysis. Error: {str(e)}",
+            error=f"We couldn't complete the analysis. Error: {str(e)} | Traceback: {error_detail[-500:]}",
             answers=session.get("user_answers", {})), 500
 
     return redirect(url_for("results"))
