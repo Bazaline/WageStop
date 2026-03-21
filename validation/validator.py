@@ -274,7 +274,7 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
     else:
         # No YTD — treat as period 1 / emergency basis
         ytd_gross_for_tax = gross_for_tax
-        if tax_period > 1:
+        if tax_period and tax_period > 1:
             flags.append(Flag(
                 severity=FlagSeverity.WARNING,
                 element_code="TAX",
