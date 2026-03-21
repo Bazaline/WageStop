@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Review Your Payslip Data — Wagestop{% endblock %}
+{% block title %}Review Your Payslip Data — PayBlur{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>Review Your Payslip Data</h1>
@@ -90,7 +90,7 @@
                   </td>
                   <td class="amount-col">
                     <input type="text" name="line_{{ line_index.val }}_amount"
-                           value="{{ '%.2f'|format(line.amount) }}"
+                           value="{{ line.amount|currency }}"
                            style="text-align:right" onchange="markAmended({{ line_index.val }})">
                   </td>
                   <td>
@@ -114,23 +114,23 @@
       <div class="metadata-grid">
         <div class="form-group">
           <label>Tax Paid (£)</label>
-          <input type="text" name="tax_paid" value="{{ payslip_data.summary.get('tax_paid','') or '' }}">
+          <input type="text" name="tax_paid" value="{{ payslip_data.summary.get('tax_paid','')|currency if payslip_data.summary.get('tax_paid','') else '' }}">
         </div>
         <div class="form-group">
           <label>NI Paid (£)</label>
-          <input type="text" name="ni_paid" value="{{ payslip_data.summary.get('ni_paid','') or '' }}">
+          <input type="text" name="ni_paid" value="{{ payslip_data.summary.get('ni_paid','')|currency if payslip_data.summary.get('ni_paid','') else '' }}">
         </div>
         <div class="form-group">
           <label>Employee Pension (£)</label>
-          <input type="text" name="ee_pension" value="{{ payslip_data.pension.get('ee_contribution','') or '' }}">
+          <input type="text" name="ee_pension" value="{{ payslip_data.pension.get('ee_contribution','')|currency if payslip_data.pension.get('ee_contribution','') else '' }}">
         </div>
         <div class="form-group">
           <label>Employer Pension (£)</label>
-          <input type="text" name="er_pension" value="{{ payslip_data.pension.get('er_contribution','') or '' }}">
+          <input type="text" name="er_pension" value="{{ payslip_data.pension.get('er_contribution','')|currency if payslip_data.pension.get('er_contribution','') else '' }}">
         </div>
         <div class="form-group">
           <label>Net Pay (£)</label>
-          <input type="text" name="net_pay" value="{{ payslip_data.summary.get('net_pay','') or '' }}">
+          <input type="text" name="net_pay" value="{{ payslip_data.summary.get('net_pay','')|currency if payslip_data.summary.get('net_pay','') else '' }}">
         </div>
       </div>
     </div>

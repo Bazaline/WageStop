@@ -22,6 +22,14 @@ from validation.models import (
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "wagestop-dev-key")
 
+@app.template_filter('currency')
+def currency_filter(value):
+    """Format a number as currency with commas e.g. 1234.56 -> 1,234.56"""
+    try:
+        return "{:,.2f}".format(float(value))
+    except (ValueError, TypeError):
+        return value
+
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff"}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -261,7 +269,9 @@ def analyse():
 
     def to_float(val):
         try:
-            return float(val) if val else None
+            if val is None or val == '':
+                return None
+            return float(str(val).replace(",", ""))
         except (TypeError, ValueError):
             return None
 
@@ -304,8 +314,15 @@ def analyse():
         ),
     )
 
-    result = validate_payslip(payslip)
-    session["validation_result"] = result_to_dict(result)
+    try:
+        result = validate_payslip(payslip)
+        session["validation_result"] = result_to_dict(result)
+    except Exception as e:
+        import traceback
+        error_detail = traceback.format_exc()
+        return render_template("upload.html",
+            error=f"We couldn't complete the analysis. Error: {str(e)}",
+            answers=session.get("user_answers", {})), 500
 
     return redirect(url_for("results"))
 
@@ -388,7 +405,9 @@ def stage2_parental():
 
     def to_float(val):
         try:
-            return float(val) if val else None
+            if val is None or val == '':
+                return None
+            return float(str(val).replace(",", ""))
         except (TypeError, ValueError):
             return None
 

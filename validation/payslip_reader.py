@@ -301,6 +301,23 @@ def build_payslip_input_from_extraction(extracted: dict) -> dict:
         cat = line.get("category", "Other")
         grouped.setdefault(cat, []).append(line)
 
+    def fmt(val):
+        """Round to 2dp, return empty string if None"""
+        try:
+            return round(float(val), 2) if val is not None else None
+        except (ValueError, TypeError):
+            return val
+
+    # Round pension values
+    raw_pension = extracted.get("pension", {})
+    pension = {k: fmt(v) if isinstance(v, (int, float, str)) else v
+               for k, v in raw_pension.items()}
+
+    # Round summary values
+    raw_summary = extracted.get("summary", {})
+    summary = {k: fmt(v) if isinstance(v, (int, float, str)) else v
+               for k, v in raw_summary.items()}
+
     return {
         "metadata": {
             "software": extracted.get("software"),
@@ -312,8 +329,8 @@ def build_payslip_input_from_extraction(extracted: dict) -> dict:
         },
         "grouped_lines": grouped,
         "all_lines": classified_lines,
-        "pension": extracted.get("pension", {}),
-        "summary": extracted.get("summary", {}),
+        "pension": pension,
+        "summary": summary,
         "ytd": extracted.get("ytd", {}),
         "extraction_method": extracted.get("_extraction_method"),
     }

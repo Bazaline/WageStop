@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Your Results — Wagestop{% endblock %}
+{% block title %}Your Results — PayBlur{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -26,9 +26,9 @@
       <tr><td>Tax Year</td><td>{{ result.tax_year }}</td></tr>
       <tr><td>Pay Frequency</td><td>{{ result.pay_frequency | title }}</td></tr>
       <tr><td>Tax Code</td><td>{{ result.tax_breakdown.tax_code }}</td></tr>
-      <tr><td>Gross for Tax</td><td>£{{ "%.2f"|format(result.gross_for_tax) }}</td></tr>
-      <tr><td>Earnings for NI</td><td>£{{ "%.2f"|format(result.earnings_for_ni) }}</td></tr>
-      <tr class="total-row" style="color:white"><td>Net Pay (calculated)</td><td>£{{ "%.2f"|format(result.net_pay_expected) }}</td></tr>
+      <tr><td>Gross for Tax</td><td>£{{ result.gross_for_tax|currency }}</td></tr>
+      <tr><td>Earnings for NI</td><td>£{{ result.earnings_for_ni|currency }}</td></tr>
+      <tr class="total-row" style="color:white"><td>Net Pay (calculated)</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
     </table>
   </div>
 
@@ -38,7 +38,7 @@
     <div class="result-card-header" onclick="toggleCard(this)">
       <h3>Income Tax</h3>
       <div class="result-status">
-        <span>Expected: £{{ "%.2f"|format(result.tax_expected) }}</span>
+        <span>Expected: £{{ result.tax_expected|currency }}</span>
         {% if tax_flags %}
           <span class="badge-error">Issue found</span>
         {% else %}
@@ -57,22 +57,22 @@
       <table class="breakdown-table">
         <tr><td>Tax code</td><td>{{ result.tax_breakdown.tax_code }}{% if result.tax_breakdown.is_emergency %} (emergency/non-cumulative){% endif %}{% if result.tax_breakdown.is_scottish %} (Scottish){% endif %}</td></tr>
         {% if result.tax_breakdown.is_k_code %}
-          <tr><td>K code addition this period</td><td>£{{ "%.2f"|format(result.tax_breakdown.k_addition) }}</td></tr>
+          <tr><td>K code addition this period</td><td>£{{ result.tax_breakdown.k_addition|currency }}</td></tr>
         {% else %}
-          <tr><td>Free pay this period</td><td>£{{ "%.2f"|format(result.tax_breakdown.free_pay_period) }}</td></tr>
+          <tr><td>Free pay this period</td><td>£{{ result.tax_breakdown.free_pay_period|currency }}</td></tr>
         {% endif %}
-        <tr><td>YTD gross for tax</td><td>£{{ "%.2f"|format(result.tax_breakdown.ytd_gross_for_tax) }}</td></tr>
-        <tr><td>YTD taxable pay</td><td>£{{ "%.2f"|format(result.tax_breakdown.ytd_taxable) }}</td></tr>
+        <tr><td>YTD gross for tax</td><td>£{{ result.tax_breakdown.ytd_gross_for_tax|currency }}</td></tr>
+        <tr><td>YTD taxable pay</td><td>£{{ result.tax_breakdown.ytd_taxable|currency }}</td></tr>
         <tr><td>YTD taxable (rounded down)</td><td>£{{ result.tax_breakdown.ytd_taxable_rounded }}</td></tr>
         {% for band in result.tax_breakdown.bands_applied %}
-          <tr><td>{{ band.band }} rate ({{ (band.rate * 100)|int }}%)</td><td>£{{ "%.2f"|format(band.tax) }}</td></tr>
+          <tr><td>{{ band.band }} rate ({{ (band.rate * 100)|int }}%)</td><td>£{{ band.tax|currency }}</td></tr>
         {% endfor %}
-        <tr><td>YTD tax calculated</td><td>£{{ "%.2f"|format(result.tax_breakdown.ytd_tax_calculated) }}</td></tr>
-        <tr><td>Prior period tax</td><td>£{{ "%.2f"|format(result.tax_breakdown.prior_period_tax) }}</td></tr>
+        <tr><td>YTD tax calculated</td><td>£{{ result.tax_breakdown.ytd_tax_calculated|currency }}</td></tr>
+        <tr><td>Prior period tax</td><td>£{{ result.tax_breakdown.prior_period_tax|currency }}</td></tr>
         {% if result.tax_breakdown.cap_applied %}
           <tr><td>⚠ 50% cap applied</td><td>—</td></tr>
         {% endif %}
-        <tr class="total-row"><td>Tax this period</td><td>£{{ "%.2f"|format(result.tax_expected) }}</td></tr>
+        <tr class="total-row"><td>Tax this period</td><td>£{{ result.tax_expected|currency }}</td></tr>
       </table>
     </div>
   </div>
@@ -83,7 +83,7 @@
     <div class="result-card-header" onclick="toggleCard(this)">
       <h3>National Insurance</h3>
       <div class="result-status">
-        <span>Expected: £{{ "%.2f"|format(result.ee_ni_expected) }}</span>
+        <span>Expected: £{{ result.ee_ni_expected|currency }}</span>
         {% if ni_flags | selectattr('severity','equalto','error') | list %}
           <span class="badge-error">Issue found</span>
         {% elif ni_flags %}
@@ -103,14 +103,14 @@
       {% endfor %}
       <table class="breakdown-table">
         <tr><td>NI category</td><td>{{ result.ni_breakdown.ni_category }}</td></tr>
-        <tr><td>Earnings for NI</td><td>£{{ "%.2f"|format(result.ni_breakdown.gross_for_ni) }}</td></tr>
+        <tr><td>Earnings for NI</td><td>£{{ result.ni_breakdown.gross_for_ni|currency }}</td></tr>
         {% for band in result.ni_breakdown.bands_applied %}
           {% if band.type == 'employee' %}
-            <tr><td>{{ band.band }} ({{ (band.rate * 100)|round(2) }}%)</td><td>£{{ "%.2f"|format(band.ni) }}</td></tr>
+            <tr><td>{{ band.band }} ({{ (band.rate * 100)|round(2) }}%)</td><td>£{{ band.ni|currency }}</td></tr>
           {% endif %}
         {% endfor %}
-        <tr class="total-row"><td>Employee NI this period</td><td>£{{ "%.2f"|format(result.ee_ni_expected) }}</td></tr>
-        <tr><td>Employer NI this period</td><td>£{{ "%.2f"|format(result.er_ni_expected) }}</td></tr>
+        <tr class="total-row"><td>Employee NI this period</td><td>£{{ result.ee_ni_expected|currency }}</td></tr>
+        <tr><td>Employer NI this period</td><td>£{{ result.er_ni_expected|currency }}</td></tr>
       </table>
     </div>
   </div>
@@ -143,9 +143,9 @@
         <table class="breakdown-table">
           <tr><td>Pension type</td><td>{{ result.pension.type }}</td></tr>
           <tr><td>Pension basis</td><td>{{ result.pension.basis }}</td></tr>
-          <tr><td>Pensionable pay</td><td>£{{ "%.2f"|format(result.pension.pensionable_pay) }}</td></tr>
-          <tr><td>Employee contribution</td><td>£{{ "%.2f"|format(result.pension.ee_expected) }}</td></tr>
-          <tr><td>Employer contribution (true)</td><td>£{{ "%.2f"|format(result.pension.er_true) }}</td></tr>
+          <tr><td>Pensionable pay</td><td>£{{ result.pension.pensionable_pay|currency }}</td></tr>
+          <tr><td>Employee contribution</td><td>£{{ result.pension.ee_expected|currency }}</td></tr>
+          <tr><td>Employer contribution (true)</td><td>£{{ result.pension.er_true|currency }}</td></tr>
           <tr class="total-row"><td>TPR minimums met</td><td>{{ '✓ Yes' if result.pension.tpr_total_met else '⚠ No' }}</td></tr>
         </table>
       </div>
@@ -157,21 +157,21 @@
     <div class="result-card-header" onclick="toggleCard(this)">
       <h3>Net Pay</h3>
       <div class="result-status">
-        <span>£{{ "%.2f"|format(result.net_pay_expected) }}</span>
+        <span>£{{ result.net_pay_expected|currency }}</span>
         {% if result.net_pay_variance < 0.05 %}
           <span class="badge-ok">✓ Correct</span>
         {% else %}
-          <span class="badge-warn">Variance: £{{ "%.2f"|format(result.net_pay_variance) }}</span>
+          <span class="badge-warn">Variance: £{{ result.net_pay_variance|currency }}</span>
         {% endif %}
         <span class="chevron">▼</span>
       </div>
     </div>
     <div class="result-card-body">
       <table class="breakdown-table">
-        <tr><td>Gross for tax</td><td>£{{ "%.2f"|format(result.gross_for_tax) }}</td></tr>
-        <tr><td>Less income tax</td><td>− £{{ "%.2f"|format(result.tax_expected) }}</td></tr>
-        <tr><td>Less employee NI</td><td>− £{{ "%.2f"|format(result.ee_ni_expected) }}</td></tr>
-        <tr class="total-row"><td>Net pay calculated</td><td>£{{ "%.2f"|format(result.net_pay_expected) }}</td></tr>
+        <tr><td>Gross for tax</td><td>£{{ result.gross_for_tax|currency }}</td></tr>
+        <tr><td>Less income tax</td><td>− £{{ result.tax_expected|currency }}</td></tr>
+        <tr><td>Less employee NI</td><td>− £{{ result.ee_ni_expected|currency }}</td></tr>
+        <tr class="total-row"><td>Net pay calculated</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
       </table>
     </div>
   </div>
