@@ -150,10 +150,12 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .results-wrap { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem 4rem; }
 .results-summary { background: var(--lilac-pale); color: var(--purple-dk); border-radius: var(--radius); padding: 2rem; margin-bottom: 0; border: 1.5px solid var(--lilac-mid); box-shadow: var(--shadow); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .results-summary h2 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 900; margin-bottom: 1.25rem; color: var(--purple-dk); }
-.summary-status { display: flex; align-items: center; gap: 0.75rem; font-size: 1rem; font-weight: 700; padding: 0.85rem 1.25rem; border-radius: 0 0 var(--radius) var(--radius); margin-bottom: 1.5rem; border: 1.5px solid var(--lilac-mid); border-top: none; }
-.status-ok    { background: #e8f5e9; color: #2e7d32; }
-.status-error { background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
-.status-warn  { background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
+.summary-status { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; border-radius: 0 0 var(--radius) var(--radius); margin-bottom: 1.5rem; border: 1.5px solid var(--lilac-mid); border-top: none; }
+.status-ok    { background: #e8f5e9; color: #2e7d32; justify-content: center; padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
+.status-ok-tick { font-size: 3.5rem; line-height: 1; color: #2e7d32; display: block; }
+.status-ok-text { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.6rem; font-weight: 600; color: #2e7d32; letter-spacing: 0.5px; }
+.status-error { font-size: 1rem; font-weight: 700; background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
+.status-warn  { font-size: 1rem; font-weight: 700; background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
 
 .result-card { background: #fff; border-radius: var(--radius); border: 1.5px solid var(--lilac-mid); margin-bottom: 1rem; overflow: hidden; box-shadow: var(--shadow); }
 .result-card-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; cursor: pointer; transition: background 0.15s; }
@@ -174,7 +176,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .breakdown-table td:last-child { text-align: right; font-weight: 700; color: var(--purple-dk); }
 .breakdown-table tr:last-child td { border-bottom: none; }
 .breakdown-table .total-row td { font-weight: 800; color: var(--lilac); font-size: 1rem; }
-.results-summary .breakdown-table .total-row td { color: var(--purple-dk); font-size: 1rem; }
+.results-summary .breakdown-table .overview-net-row td { color: var(--purple-dk); font-weight: 800; font-size: 0.95rem; }
 .results-summary .breakdown-table td { font-size: 0.95rem; padding: 0.55rem 0; }
 
 .flag-box { border-radius: 10px; padding: 0.875rem 1rem; margin-bottom: 0.75rem; font-size: 0.875rem; line-height: 1.5; }
@@ -292,10 +294,14 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .payline-expand { text-align: center; width: 36px; color: var(--lilac-lt); }
 
 .type-pill { display: inline-block; background: var(--lilac-pale); color: var(--lilac); border: 1px solid var(--lilac-mid); border-radius: 20px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.er-further-badge { display: inline-block; background: #fde8e8; color: var(--red); border: 1px solid #f5c0c0; border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.chevron--alert { color: var(--red) !important; font-weight: 900; }
 
 .payline-detail-row td { padding: 0 !important; border-bottom: 1px solid var(--lilac-mid) !important; }
 .payline-detail-cell { padding: 1.25rem !important; background: var(--grey-100); }
 
+
+.er-pension-stat-arrow { color: #2e7d32; font-size: 1.1rem; font-weight: 900; cursor: pointer; }
 @media (max-width: 768px) {
   .hero-inner { grid-template-columns: 1fr; gap: 2.5rem; }
   .hero-visual { display: none; }

@@ -305,8 +305,13 @@
 
   {# ---- PENSION ---- #}
   {% if result.pension.type %}
-  {% set pension_flags = result.flags | selectattr('element_code','in',['PENSION','PENSION_EE','PENSION_ER']) | list %}
-  {% set pension_error = pension_flags | selectattr('severity','equalto','error') | list | length > 0 %}
+  {% set pension_flags    = result.flags | selectattr('element_code','in',['PENSION','PENSION_EE','PENSION_ER']) | list %}
+  {% set pension_ee_flags = result.flags | selectattr('element_code','in',['PENSION','PENSION_EE']) | list %}
+  {% set pension_er_flags = result.flags | selectattr('element_code','equalto','PENSION_ER') | list %}
+  {% set pension_ee_error = pension_ee_flags | selectattr('severity','equalto','error') | list | length > 0 %}
+  {% set pension_er_error = pension_er_flags | selectattr('severity','equalto','error') | list | length > 0 %}
+  {% set parental_flag    = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
+  {% set has_parental     = parental_flag | length > 0 %}
   <div class="payline-card">
     <div class="payline-card-header">Pension</div>
     <table class="payline-table">
@@ -315,34 +320,78 @@
         <th style="width:20%" class="th-right">Amount (£)</th><th style="width:10%"></th><th style="width:12%"></th>
       </tr></thead>
       <tbody>
-        <tr class="payline-row {% if pension_error %}payline-row--error{% endif %}" onclick="togglePanel('pension-detail')" style="cursor:pointer">
+
+        {# --- EMPLOYEE PENSION ROW --- #}
+        <tr class="payline-row {% if pension_ee_error %}payline-row--error{% endif %}"
+            onclick="togglePanel('pension-ee-detail')" style="cursor:pointer">
           <td class="payline-desc">Employee Pension</td>
           <td class="payline-type"><span class="type-pill">{{ result.pension.type }}</span></td>
           <td class="payline-amount payline-deduct">−£{{ result.pension.ee_expected|currency }}</td>
-          <td class="payline-status">{% if pension_error %}<span class="mock-cross">✘</span>{% else %}<span class="mock-tick">✔</span>{% endif %}</td>
-          <td class="payline-expand"><span class="chevron" id="chev-pension-detail">▼</span></td>
+          <td class="payline-status">
+            {% if pension_ee_error %}<span class="mock-cross">✘</span>
+            {% else %}<span class="mock-tick">✔</span>{% endif %}
+          </td>
+          <td class="payline-expand"><span class="chevron" id="chev-pension-ee-detail">▼</span></td>
         </tr>
-        <tr class="payline-detail-row" id="panel-pension-detail" style="display:none">
+        <tr class="payline-detail-row" id="panel-pension-ee-detail" style="display:none">
           <td colspan="5" class="payline-detail-cell">
-            {% for flag in pension_flags %}<div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>{% endfor %}
+            {% for flag in pension_ee_flags %}
+              <div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>
+            {% endfor %}
             <table class="breakdown-table">
               <tr><td>Pension type</td><td>{{ result.pension.type }}</td></tr>
               <tr><td>Pension basis</td><td>{{ result.pension.basis }}</td></tr>
               <tr><td>Pensionable pay</td><td>£{{ result.pension.pensionable_pay|currency }}</td></tr>
-              <tr><td>Employee contribution (expected)</td><td>£{{ result.pension.ee_expected|currency }}</td></tr>
-              <tr><td>Employer contribution (true)</td><td>£{{ result.pension.er_true|currency }}</td></tr>
-              <tr class="total-row"><td>TPR minimums met</td><td>{{ '✓ Yes' if result.pension.tpr_total_met else '⚠ No' }}</td></tr>
+              <tr class="total-row"><td>Employee contribution (expected)</td><td>£{{ result.pension.ee_expected|currency }}</td></tr>
             </table>
           </td>
         </tr>
+
+        {# --- EMPLOYER PENSION ROW --- #}
+        {% if result.pension.er_true is not none %}
+        <tr class="payline-row {% if pension_er_error %}payline-row--error{% endif %}"
+            {% if has_parental %}onclick="openStage2()" style="cursor:pointer"
+            {% elif pension_er_flags %}onclick="togglePanel('pension-er-detail')" style="cursor:pointer"
+            {% else %}onclick="togglePanel('pension-er-detail')" style="cursor:pointer"{% endif %}>
+          <td class="payline-desc">Employer Pension</td>
+          <td class="payline-type"><span class="type-pill">{{ result.pension.type }}</span></td>
+          <td class="payline-amount">£{{ result.pension.er_true|currency }}</td>
+          <td class="payline-status">
+            {% if has_parental %}
+              <span class="er-further-badge">Further data required</span>
+            {% elif pension_er_error %}<span class="mock-cross">✘</span>
+            {% else %}<span class="mock-tick">✔</span>{% endif %}
+          </td>
+          <td class="payline-expand">
+            <span class="chevron {% if has_parental %}chevron--alert{% endif %}"
+                  id="chev-pension-er-detail">▼</span>
+          </td>
+        </tr>
+        {% if not has_parental %}
+        <tr class="payline-detail-row" id="panel-pension-er-detail" style="display:none">
+          <td colspan="5" class="payline-detail-cell">
+            {% for flag in pension_er_flags %}
+              <div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>
+            {% endfor %}
+            <table class="breakdown-table">
+              <tr><td>Pension basis</td><td>{{ result.pension.basis }}</td></tr>
+              <tr><td>Pensionable pay</td><td>£{{ result.pension.pensionable_pay|currency }}</td></tr>
+              <tr class="total-row"><td>Employer contribution (true)</td><td>£{{ result.pension.er_true|currency }}</td></tr>
+              <tr><td>TPR minimums met</td><td>{{ '✓ Yes' if result.pension.tpr_total_met else '⚠ No' }}</td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+        {% endif %}
+
       </tbody>
     </table>
   </div>
   {% endif %}
 
-  {# ---- EMPLOYER COSTS ---- #}
-  {% if employer %}
-  {% set parental_flag = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
+  {# ---- EMPLOYER COSTS (Employer NI only — Employer Pension shown in Pension section) ---- #}
+  {% set employer_ni_lines = employer | selectattr('element_code','equalto','E1') | list %}
+  {% if employer_ni_lines %}
   <div class="payline-card">
     <div class="payline-card-header">Employer Costs</div>
     <table class="payline-table">
@@ -351,33 +400,25 @@
         <th style="width:20%" class="th-right">Amount (£)</th><th style="width:10%"></th><th style="width:12%"></th>
       </tr></thead>
       <tbody>
-        {% for line in employer %}
+        {% for line in employer_ni_lines %}
           {% set ecode = line.element_code %}
           {% set row_flags = result.flags | selectattr('element_code','equalto',ecode) | list %}
           {% set has_issue = row_flags | selectattr('severity','equalto','error') | list | length > 0 %}
-          {% set pid = 'emp-' ~ loop.index %}
-          {# For employer pension (E3) with parental pay: show green dropdown to Stage 2 instead of tick #}
-          {% set is_er_pension_with_stat = (ecode == 'E3' and parental_flag | length > 0) %}
+          {% set pid = 'empni-' ~ loop.index %}
           <tr class="payline-row {% if has_issue %}payline-row--error{% endif %}"
-              {% if is_er_pension_with_stat %}onclick="openStage2()" style="cursor:pointer"
-              {% elif row_flags %}onclick="togglePanel('{{ pid }}')" style="cursor:pointer"{% endif %}>
+              {% if row_flags %}onclick="togglePanel('{{ pid }}')" style="cursor:pointer"{% endif %}>
             <td class="payline-desc">{{ line.description }}</td>
             <td class="payline-type"><span class="type-pill">{{ line.element_code }}</span></td>
             <td class="payline-amount">£{{ line.amount|currency }}</td>
             <td class="payline-status">
-              {% if is_er_pension_with_stat %}
-                {# Green dropdown arrow — links to Stage 2 form below #}
-                <span class="er-pension-stat-arrow" title="More information needed — see below">▼</span>
-              {% elif has_issue %}<span class="mock-cross">✘</span>
+              {% if has_issue %}<span class="mock-cross">✘</span>
               {% else %}<span class="mock-tick">✔</span>{% endif %}
             </td>
             <td class="payline-expand">
-              {% if is_er_pension_with_stat %}
-                <span class="er-pension-stat-arrow">▼</span>
-              {% elif row_flags %}<span class="chevron" id="chev-{{ pid }}">▼</span>{% endif %}
+              {% if row_flags %}<span class="chevron" id="chev-{{ pid }}">▼</span>{% endif %}
             </td>
           </tr>
-          {% if row_flags and not is_er_pension_with_stat %}
+          {% if row_flags %}
           <tr class="payline-detail-row" id="panel-{{ pid }}" style="display:none">
             <td colspan="5" class="payline-detail-cell">
               {% for flag in row_flags %}<div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>{% endfor %}
