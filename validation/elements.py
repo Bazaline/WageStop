@@ -19,7 +19,7 @@ ELEMENT_KEYWORDS = {
              "gross", "monthly pay", "regular", "weekly pay"],
     "A2":  ["overtime", "additional hours", "extra hours"],
     "A3":  ["holiday pay", "holiday", "hols", "annual leave"],
-    "A4":  ["back pay", "arrears", "adjustment", "backpay"],
+    "A4":  ["salary adjustment", "back pay", "arrears", "adjustment", "backpay"],
     "A5":  ["commission", "comm"],
     "A6":  ["bonus"],
     "A7":  ["on call", "on-call", "standby"],
@@ -36,7 +36,7 @@ ELEMENT_KEYWORDS = {
     "A18": ["ssp", "statutory sick", "sick pay"],
     "A19": ["enhanced pay", "enhanced maternity", "top up", "enhancement"],
     # Parental pay covers SMP and SPP
-    "A16_OR_A17": ["parental pay", "statutory parental", "parental leave pay"],
+    "A16_OR_A17": ["statutory pay", "parental pay", "statutory parental", "parental leave pay"],
     # SAP and ShPP treated same as SMP/SPP
     "A16": ["sap", "statutory adoption", "adoption pay",
             "shpp", "shared parental", "spbp", "sncp"],
@@ -162,7 +162,7 @@ ELEMENT_DISPLAY_NAMES = {
     "A1": "Salary / Basic Pay",
     "A2": "Overtime",
     "A3": "Holiday Pay",
-    "A4": "Back Pay / Arrears",
+    "A4": "Back Pay / Salary Adjustment",
     "A5": "Commission",
     "A6": "Bonus",
     "A7": "On Call",
