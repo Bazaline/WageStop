@@ -162,7 +162,7 @@ ELEMENT_DISPLAY_NAMES = {
     "A1": "Salary / Basic Pay",
     "A2": "Overtime",
     "A3": "Holiday Pay",
-    "A4": "Back Pay / Salary Adjustment",
+    "A4": "Back Pay / Arrears",
     "A5": "Commission",
     "A6": "Bonus",
     "A7": "On Call",
