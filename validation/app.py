@@ -419,6 +419,16 @@ def stage2_parental():
     pre_leave_er   = to_float(request.form.get("pre_leave_er_pension"))
     is_sal_sac     = request.form.get("is_salary_sacrifice", "no")
 
+    # Persist Stage 2 form inputs in session so they re-populate after redirect
+    session["stage2_inputs"] = {
+        "salary_monthly": request.form.get("salary_monthly", ""),
+        "salary_weekly":  request.form.get("salary_weekly", ""),
+        "salary_annual":  request.form.get("salary_annual", ""),
+        "pre_leave_ee_pension": request.form.get("pre_leave_ee_pension", ""),
+        "pre_leave_er_pension": request.form.get("pre_leave_er_pension", ""),
+        "is_salary_sacrifice":  is_sal_sac,
+    }
+
     # Determine salary and input frequency
     if salary_monthly:
         salary = salary_monthly
@@ -505,11 +515,13 @@ def results():
     payslip_data = session.get("payslip_data", {})
     stage2_result = session.pop("stage2_result", None)
 
+    stage2_inputs = session.get("stage2_inputs", {})
     return render_template(
         "results.html",
         result=result,
         payslip_data=payslip_data,
         stage2_result=stage2_result,
+        stage2_inputs=stage2_inputs,
     )
 
 
@@ -520,16 +532,6 @@ def results():
 @app.route("/contacts")
 def contacts():
     return render_template("contacts.html")
-
-
-# ---------------------------------------------------------------------------
-# PAYSLIP REVIEW
-# ---------------------------------------------------------------------------
-
-@app.route("/payslip-review")
-def payslip_review():
-    result = session.get("validation_result")
-    return render_template("payslip_review.html", result=result)
 
 
 if __name__ == "__main__":

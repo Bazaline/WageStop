@@ -158,24 +158,43 @@ def normalise_to_payslip_frequency(salary: float,
 
 def derive_pension_basis_from_pre_leave(normalised_salary: float,
                                          pre_leave_er_pension: float,
-                                         payslip_frequency: str) -> tuple:
+                                         payslip_frequency: str,
+                                         tolerance: float = 15.0) -> tuple:
     """
     Determine QE or All Pay from pre-leave payslip data.
     Returns (basis, er_rate)
+    Uses a wider tolerance (£15) to handle rounding and salary adjustments.
     """
     lel = LEL[payslip_frequency]
     qe_base = normalised_salary - lel
 
     if qe_base > 0:
         for rate in COMMON_PENSION_RATES:
-            if abs(pre_leave_er_pension - round(qe_base * rate, 2)) <= STAT_PAY_TOLERANCE:
+            if abs(pre_leave_er_pension - round(qe_base * rate, 2)) <= tolerance:
                 return "QE", rate
 
     for rate in COMMON_PENSION_RATES:
-        if abs(pre_leave_er_pension - round(normalised_salary * rate, 2)) <= STAT_PAY_TOLERANCE:
+        if abs(pre_leave_er_pension - round(normalised_salary * rate, 2)) <= tolerance:
             return "ALL_PAY", rate
 
-    return "UNKNOWN", None
+    # Fallback: use closest match
+    best_basis = "ALL_PAY"
+    best_rate = COMMON_PENSION_RATES[0]
+    best_diff = float('inf')
+    for rate in COMMON_PENSION_RATES:
+        diff_all = abs(pre_leave_er_pension - round(normalised_salary * rate, 2))
+        if diff_all < best_diff:
+            best_diff = diff_all
+            best_rate = rate
+            best_basis = "ALL_PAY"
+        if qe_base > 0:
+            diff_qe = abs(pre_leave_er_pension - round(qe_base * rate, 2))
+            if diff_qe < best_diff:
+                best_diff = diff_qe
+                best_rate = rate
+                best_basis = "QE"
+
+    return best_basis, best_rate
 
 
 def stage2_calculate_expected_er(pre_leave_salary: float,
@@ -188,22 +207,67 @@ def stage2_calculate_expected_er(pre_leave_salary: float,
     """
     Stage 2: Calculate expected Er using pre-leave data.
     Returns (expected_er, basis, flag_or_none)
+
+    SALARY SACRIFICE + STATUTORY PAY (this function is only called when stat pay present):
+      For salary sacrifice, the combined Sage/BrightPay Er figure = Ee sacrifice + true Er,
+      both calculated on the SAME full salary base at their respective rates.
+      e.g. Ee 4% of £12,500 + Er 4% of £12,500 = £1,000 combined.
+
+      The correct approach: derive the COMBINED rate directly from the combined Er figure
+      and the pre-leave salary, then apply that combined rate to the expected normal salary.
+      Do NOT try to split via the B5 sacrifice amount (different base due to salary adjustments).
+
+    NON-SALARY-SACRIFICE:
+      pre_leave_er_pension = true Er shown on old payslip — derive rate normally.
     """
     normalised = normalise_to_payslip_frequency(
         pre_leave_salary, pre_leave_salary_frequency, payslip_frequency
     )
-    basis, er_rate = derive_pension_basis_from_pre_leave(
-        normalised, pre_leave_er_pension, payslip_frequency
-    )
     lel = LEL[payslip_frequency]
-    pensionable_base = (normalised - lel) if basis == "QE" else normalised
 
     if is_salary_sacrifice:
-        ee_rate = pre_leave_ee_pension / pensionable_base if pensionable_base > 0 else 0
-        combined_rate = ee_rate + (er_rate or 0)
-        ee_sacrifice_on_other = round(other_pensionable_on_payslip * ee_rate, 2)
-        expected_er = round((pensionable_base * combined_rate) - ee_sacrifice_on_other, 2)
+        # Derive the COMBINED rate (Ee sacrifice % + true Er %) directly from
+        # combined Er shown ÷ pre-leave salary (or QE base).
+        # This avoids the splitting problem caused by salary adjustments.
+
+        # Try All Pay basis first (combined ÷ full salary)
+        combined_rate = pre_leave_er_pension / normalised if normalised > 0 else 0
+
+        # Also try QE basis (combined ÷ QE base)
+        qe_base = normalised - lel
+        combined_rate_qe = pre_leave_er_pension / qe_base if qe_base > 0 else 0
+
+        # Determine which basis produces a rate that matches a sensible pension rate
+        # (i.e. a multiple of 0.5% between 1% and 30%)
+        def nearest_half_pct(rate):
+            return round(rate * 200) / 200   # round to nearest 0.5%
+
+        combined_rate_rounded = nearest_half_pct(combined_rate)
+        combined_rate_qe_rounded = nearest_half_pct(combined_rate_qe)
+
+        # Pick QE if it produces a cleaner rate, otherwise All Pay
+        # Simple heuristic: use All Pay unless QE rate is a cleaner match
+        all_pay_diff = abs(combined_rate - combined_rate_rounded)
+        qe_diff      = abs(combined_rate_qe - combined_rate_qe_rounded) if qe_base > 0 else 999
+
+        if qe_base > 0 and qe_diff < all_pay_diff:
+            basis = "QE"
+            pensionable_base = qe_base
+            final_rate = combined_rate_qe_rounded
+        else:
+            basis = "ALL_PAY"
+            pensionable_base = normalised
+            final_rate = combined_rate_rounded
+
+        # Expected combined Er = combined rate × normal pensionable base
+        expected_er = round(pensionable_base * final_rate, 2)
+
     else:
+        # Non-salary sacrifice: derive true Er rate normally
+        basis, er_rate = derive_pension_basis_from_pre_leave(
+            normalised, pre_leave_er_pension, payslip_frequency
+        )
+        pensionable_base = (normalised - lel) if basis == "QE" else normalised
         expected_er = round(pensionable_base * (er_rate or 0), 2)
 
     return expected_er, basis, None
