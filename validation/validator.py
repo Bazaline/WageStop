@@ -553,9 +553,8 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
     # minus salary sacrifice/NPA (already in gross_for_tax reduction)
     # For RAS pension: the employee's net contribution (80%) also deducts from net pay
     # since gross_for_tax is unchanged for RAS.
-    from .models import PensionType as _PT
     ras_pension_deduction = 0.0
-    if pension_breakdown and pension_breakdown.pension_type == _PT.RAS:
+    if pension_breakdown and pension_breakdown.pension_type == PensionType.RAS:
         ras_pension_deduction = pension_breakdown.ee_contribution_expected or 0.0
 
     net_pay_expected = round(
