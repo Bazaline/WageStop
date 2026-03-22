@@ -15,11 +15,12 @@ from typing import Optional
 
 ELEMENT_KEYWORDS = {
     # --- PAYMENTS ---
-    "A1":  ["salary", "basic", "base", "wage", "wages", "hours", "hrs",
-             "gross", "monthly pay", "regular", "weekly pay"],
+    "A1":  ["salary", "basic", "base", "wage", "wages", "hours", "hourly",
+             "hrs", "gross", "monthly pay", "regular", "weekly pay",
+             "standard hours", "contracted hours", "pay rate"],
     "A2":  ["overtime", "additional hours", "extra hours"],
     "A3":  ["holiday pay", "holiday", "hols", "annual leave"],
-    "A4":  ["salary adjustment", "back pay", "arrears", "adjustment", "backpay"],
+    "A4":  ["back pay", "arrears", "adjustment", "backpay"],
     "A5":  ["commission", "comm"],
     "A6":  ["bonus"],
     "A7":  ["on call", "on-call", "standby"],
@@ -36,7 +37,7 @@ ELEMENT_KEYWORDS = {
     "A18": ["ssp", "statutory sick", "sick pay"],
     "A19": ["enhanced pay", "enhanced maternity", "top up", "enhancement"],
     # Parental pay covers SMP and SPP
-    "A16_OR_A17": ["statutory pay", "parental pay", "statutory parental", "parental leave pay"],
+    "A16_OR_A17": ["parental pay", "statutory parental", "parental leave pay"],
     # SAP and ShPP treated same as SMP/SPP
     "A16": ["sap", "statutory adoption", "adoption pay",
             "shpp", "shared parental", "spbp", "sncp"],
@@ -73,9 +74,11 @@ ELEMENT_KEYWORDS = {
 
     # --- EMPLOYER COSTS ---
     "E1":  ["employer ni", "er ni", "employer nic", "er nic",
-             "employers ni", "employers nic"],
+             "employers ni", "employers nic",
+             "employers national insurance", "employer national insurance"],
     "E3":  ["employer pension", "er pension", "er pen",
-             "employers pension", "employer contribution"],
+             "employers pension", "employer contribution",
+             "employer pension ae", "employer pension non-ae"],
 }
 
 # Build reverse lookup: keyword -> element_code
@@ -100,6 +103,7 @@ ELEMENT_CATEGORIES = {
     "Tax & NI":   ["C1","C2"],
     "Benefits":   ["D1","D2","D3"],
     "Employer Costs": ["E1","E3"],
+    "Other":      ["A100"],
 }
 
 

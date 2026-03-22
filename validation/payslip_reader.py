@@ -90,7 +90,11 @@ Rules:
 - pay_lines: payments only (positive amounts)
 - deduction_lines: deductions only (negative/deducted amounts, return as positive)
 - Salary sacrifice: include as a pay_line with a negative amount
-- employer_ni and employer_pension go in deduction_lines
+- employer_ni and employer_pension ALWAYS go in deduction_lines — even if they only appear in a summary table, totals grid, or "this period" section at the bottom of the payslip. Do not leave them in summary. Actively search for them.
+- Employer NI appears under many labels: "Employer NI", "Employer's NI", "Employers National Insurance", "Employer NIC", "Er NI" — always extract into deduction_lines regardless of where it appears on the payslip
+- Employer pension appears under labels like: "Employer Pension", "Employer Pension AE", "Er Pension" — always extract into deduction_lines
+- If Employer NI or Employer Pension appear ONLY in a summary/totals grid and not as a named payment/deduction line, still extract the "This Period" or current period value into deduction_lines using the label shown
+- summary fields (gross_for_tax, tax_paid, ni_paid, net_pay etc.) are for employee-facing cross-check figures only — do NOT put employer costs here
 - Return null for any field not shown on the payslip
 - NEVER invent or estimate figures — only extract what is clearly visible
 - Do not include employee name, NI number, or home address"""

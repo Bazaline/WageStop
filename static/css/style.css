@@ -151,9 +151,9 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .results-summary { background: var(--lilac-pale); color: var(--purple-dk); border-radius: var(--radius); padding: 2rem; margin-bottom: 0; border: 1.5px solid var(--lilac-mid); box-shadow: var(--shadow); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .results-summary h2 { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 900; margin-bottom: 1.25rem; color: var(--purple-dk); }
 .summary-status { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; border-radius: 0 0 var(--radius) var(--radius); margin-bottom: 1.5rem; border: 1.5px solid var(--lilac-mid); border-top: none; }
-.status-ok    { background: #e8f5e9; color: #2e7d32; justify-content: center; padding: 1.5rem; flex-direction: column; gap: 0.5rem; }
-.status-ok-tick { font-size: 3.5rem; line-height: 1; color: #2e7d32; display: block; }
-.status-ok-text { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; font-size: 1.6rem; font-weight: 600; color: #2e7d32; letter-spacing: 0.5px; }
+.status-ok    { background: #e8f5e9; color: #2e7d32; align-items: center; gap: 0.75rem; }
+.status-ok-tick { font-size: 1.4rem; color: #2e7d32; flex-shrink: 0; }
+.status-ok-text { font-family: 'Bradley Hand ITC', 'Bradley Hand', 'Segoe Print', cursive; font-weight: 700; font-size: 1.15rem; color: #2e7d32; }
 .status-error { font-size: 1rem; font-weight: 700; background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
 .status-warn  { font-size: 1rem; font-weight: 700; background: #fff8e1; color: #b45309; border: 1.5px solid var(--mustard); border-top: none; }
 

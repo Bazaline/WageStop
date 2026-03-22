@@ -41,7 +41,9 @@
     {% set line_index = namespace(val=0) %}
 
     {% for category, codes in element_categories.items() %}
-      {% set cat_lines = all_lines | selectattr('category','equalto',category) | list %}
+      {% set cat_lines = all_lines | selectattr('category','equalto',category)
+                                   | rejectattr('amount','equalto',0)
+                                   | rejectattr('amount','equalto',0.0) | list %}
       {% if cat_lines %}
         <div class="review-section">
           <div class="review-section-header">
@@ -68,8 +70,7 @@
                     <select name="line_{{ line_index.val }}_element_code" onchange="markAmended({{ line_index.val }})">
                       {% for code, name in [
                           ('A1','Salary'),('A2','Overtime'),('A3','Holiday Pay'),
-                          ('A4','Back Pay / Arrears'),
-                          ('A4','Salary Adjustment'),('A5','Commission'),('A6','Bonus'),
+                          ('A4','Back Pay'),('A5','Commission'),('A6','Bonus'),
                           ('A7','On Call'),('A8','Incentive'),('A9','Car Allowance'),
                           ('A10','Mobile Allowance'),('A11','WFH Allowance'),
                           ('A12','Tronc'),('A13','Expenses'),('A14','PILON'),

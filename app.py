@@ -415,9 +415,19 @@ def stage2_parental():
     salary_monthly = to_float(request.form.get("salary_monthly"))
     salary_weekly  = to_float(request.form.get("salary_weekly"))
     salary_annual  = to_float(request.form.get("salary_annual"))
-    pre_leave_ee   = to_float(request.form.get("pre_leave_ee_pension"))
-    pre_leave_er   = to_float(request.form.get("pre_leave_er_pension"))
+    ee_pct         = to_float(request.form.get("pre_leave_ee_pct"))   # employee contribution %
+    er_pct         = to_float(request.form.get("pre_leave_er_pct"))   # employer contribution %
     is_sal_sac     = request.form.get("is_salary_sacrifice", "no")
+
+    # Persist Stage 2 form inputs in session so they re-populate after redirect
+    session["stage2_inputs"] = {
+        "salary_monthly":   request.form.get("salary_monthly", ""),
+        "salary_weekly":    request.form.get("salary_weekly", ""),
+        "salary_annual":    request.form.get("salary_annual", ""),
+        "pre_leave_ee_pct": request.form.get("pre_leave_ee_pct", ""),
+        "pre_leave_er_pct": request.form.get("pre_leave_er_pct", ""),
+        "is_salary_sacrifice": is_sal_sac,
+    }
 
     # Determine salary and input frequency
     if salary_monthly:
@@ -436,14 +446,22 @@ def stage2_parental():
         }
         return redirect(url_for("results"))
 
-    if not pre_leave_ee or not pre_leave_er:
+    if ee_pct is None or er_pct is None:
         session["stage2_result"] = {
-            "message": "Please enter both your employee and employer pension amounts.",
+            "message": "Please enter both your employee and employer contribution percentages.",
             "underpaid": False,
         }
         return redirect(url_for("results"))
 
     is_salary_sacrifice = is_sal_sac == "yes"
+
+    # Convert % to £ for the calculation engine
+    if is_salary_sacrifice:
+        pre_leave_ee = salary * ee_pct / 100
+        pre_leave_er = salary * (ee_pct + er_pct) / 100   # combined for Sage/BrightPay
+    else:
+        pre_leave_ee = salary * ee_pct / 100
+        pre_leave_er = salary * er_pct / 100
 
     # Get other pensionable pay from current payslip (non-stat pay)
     other_pensionable = 0.0
@@ -505,11 +523,13 @@ def results():
     payslip_data = session.get("payslip_data", {})
     stage2_result = session.pop("stage2_result", None)
 
+    stage2_inputs = session.get("stage2_inputs", {})
     return render_template(
         "results.html",
         result=result,
         payslip_data=payslip_data,
         stage2_result=stage2_result,
+        stage2_inputs=stage2_inputs,
     )
 
 
@@ -520,16 +540,6 @@ def results():
 @app.route("/contacts")
 def contacts():
     return render_template("contacts.html")
-
-
-# ---------------------------------------------------------------------------
-# PAYSLIP REVIEW
-# ---------------------------------------------------------------------------
-
-@app.route("/payslip-review")
-def payslip_review():
-    result = session.get("validation_result")
-    return render_template("payslip_review.html", result=result)
 
 
 if __name__ == "__main__":

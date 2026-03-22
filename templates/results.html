@@ -9,9 +9,14 @@
 
 <div class="results-wrap">
 
-  {# ---- OVERVIEW BOX ---- #}
+  {# ---- TOP-LEVEL FLAG DETECTION (used in status badge + pension section) ---- #}
   {% set errors = result.flags | selectattr('severity','equalto','error') | list %}
   {% set warnings = result.flags | selectattr('severity','equalto','warning') | list %}
+  {% set parental_flag = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
+  {% set has_parental  = parental_flag | length > 0 %}
+  {% set stage2_pending = has_parental and not stage2_result %}
+
+  {# ---- OVERVIEW BOX ---- #}
 
   <div class="results-summary">
     <h2>Overview</h2>
@@ -30,12 +35,14 @@
 
   {% if errors %}
     <div class="summary-status status-error">⚠ {{ errors | length }} issue{{ 's' if errors|length > 1 }} found</div>
+  {% elif stage2_pending %}
+    <div class="summary-status status-warn">ℹ One entry needs your attention before we can finalise the checks</div>
   {% elif warnings %}
     <div class="summary-status status-warn">ℹ {{ warnings | length }} item{{ 's' if warnings|length > 1 }} to be aware of</div>
   {% else %}
     <div class="summary-status status-ok">
       <span class="status-ok-tick">✔</span>
-      <span class="status-ok-text">All calculations look correct</span>
+      <span class="status-ok-text">All calculations look correct!</span>
     </div>
   {% endif %}
 
@@ -119,7 +126,8 @@
   {% set deductions = payslip_data.get('confirmed_lines', payslip_data.get('all_lines', []))
                      | selectattr('category','equalto','Deductions') | list %}
   {% set tax_ni    = payslip_data.get('confirmed_lines', payslip_data.get('all_lines', []))
-                     | selectattr('category','in',['Tax & NI']) | list %}
+                     | selectattr('category','in',['Tax & NI'])
+                     | rejectattr('element_code','in',['E1','E3']) | list %}
   {% set pension   = payslip_data.get('confirmed_lines', payslip_data.get('all_lines', []))
                      | selectattr('category','equalto','Pension') | list %}
   {% set employer  = payslip_data.get('confirmed_lines', payslip_data.get('all_lines', []))
@@ -230,7 +238,7 @@
         {% set tax_error = tax_flags | selectattr('severity','equalto','error') | list | length > 0 %}
         <tr class="payline-row {% if tax_error %}payline-row--error{% endif %}" onclick="togglePanel('tax-detail')" style="cursor:pointer">
           <td class="payline-desc">Income Tax</td>
-          <td class="payline-type"><span class="type-pill">C1</span></td>
+          <td class="payline-type"><span class="type-pill">Income Tax</span></td>
           <td class="payline-amount payline-deduct">−£{{ result.tax_expected|currency }}</td>
           <td class="payline-status">{% if tax_error %}<span class="mock-cross">✘</span>{% else %}<span class="mock-tick">✔</span>{% endif %}</td>
           <td class="payline-expand"><span class="chevron" id="chev-tax-detail">▼</span></td>
@@ -264,7 +272,7 @@
         {% set ni_error = ni_flags | selectattr('severity','equalto','error') | list | length > 0 %}
         <tr class="payline-row {% if ni_error %}payline-row--error{% endif %}" onclick="togglePanel('ni-detail')" style="cursor:pointer">
           <td class="payline-desc">National Insurance</td>
-          <td class="payline-type"><span class="type-pill">C2</span></td>
+          <td class="payline-type"><span class="type-pill">National Insurance</span></td>
           <td class="payline-amount payline-deduct">−£{{ result.ee_ni_expected|currency }}</td>
           <td class="payline-status">{% if ni_error %}<span class="mock-cross">✘</span>{% else %}<span class="mock-tick">✔</span>{% endif %}</td>
           <td class="payline-expand"><span class="chevron" id="chev-ni-detail">▼</span></td>
@@ -286,9 +294,9 @@
           </td>
         </tr>
 
-        {# Any other Tax & NI lines from payslip (shouldn't be many) #}
+        {# Any other Tax & NI lines — exclude E1/E3 which belong in Employer Costs #}
         {% for line in tax_ni %}
-          {% if line.element_code not in ('C1','C2') %}
+          {% if line.element_code not in ('C1','C2','E1','E3') %}
           <tr class="payline-row">
             <td class="payline-desc">{{ line.description }}</td>
             <td class="payline-type"><span class="type-pill">{{ line.element_code }}</span></td>
@@ -310,8 +318,6 @@
   {% set pension_er_flags = result.flags | selectattr('element_code','equalto','PENSION_ER') | list %}
   {% set pension_ee_error = pension_ee_flags | selectattr('severity','equalto','error') | list | length > 0 %}
   {% set pension_er_error = pension_er_flags | selectattr('severity','equalto','error') | list | length > 0 %}
-  {% set parental_flag    = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
-  {% set has_parental     = parental_flag | length > 0 %}
   <div class="payline-card">
     <div class="payline-card-header">Pension</div>
     <table class="payline-table">
@@ -349,39 +355,122 @@
 
         {# --- EMPLOYER PENSION ROW --- #}
         {% if result.pension.er_true is not none %}
-        <tr class="payline-row {% if pension_er_error %}payline-row--error{% endif %}"
-            {% if has_parental %}onclick="openStage2()" style="cursor:pointer"
-            {% elif pension_er_flags %}onclick="togglePanel('pension-er-detail')" style="cursor:pointer"
-            {% else %}onclick="togglePanel('pension-er-detail')" style="cursor:pointer"{% endif %}>
+        <tr class="payline-row {% if pension_er_error %}payline-row--error{% elif stage2_pending %}payline-row--warning{% endif %}"
+            onclick="togglePanel('pension-er-detail')" style="cursor:pointer">
           <td class="payline-desc">Employer Pension</td>
           <td class="payline-type"><span class="type-pill">{{ result.pension.type }}</span></td>
           <td class="payline-amount">£{{ result.pension.er_true|currency }}</td>
           <td class="payline-status">
-            {% if has_parental %}
+            {% if stage2_pending %}
               <span class="er-further-badge">Further data required</span>
+            {% elif stage2_result and stage2_result.underpaid %}<span class="mock-cross">✘</span>
+            {% elif stage2_result and not stage2_result.underpaid %}<span class="mock-tick">✔</span>
             {% elif pension_er_error %}<span class="mock-cross">✘</span>
             {% else %}<span class="mock-tick">✔</span>{% endif %}
           </td>
           <td class="payline-expand">
-            <span class="chevron {% if has_parental %}chevron--alert{% endif %}"
+            <span class="chevron {% if stage2_pending %}chevron--alert{% endif %}"
                   id="chev-pension-er-detail">▼</span>
           </td>
         </tr>
-        {% if not has_parental %}
+
+        {# Panel: shows Stage 2 form when pending, result breakdown when done #}
         <tr class="payline-detail-row" id="panel-pension-er-detail" style="display:none">
           <td colspan="5" class="payline-detail-cell">
-            {% for flag in pension_er_flags %}
-              <div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>
-            {% endfor %}
-            <table class="breakdown-table">
-              <tr><td>Pension basis</td><td>{{ result.pension.basis }}</td></tr>
-              <tr><td>Pensionable pay</td><td>£{{ result.pension.pensionable_pay|currency }}</td></tr>
-              <tr class="total-row"><td>Employer contribution (true)</td><td>£{{ result.pension.er_true|currency }}</td></tr>
-              <tr><td>TPR minimums met</td><td>{{ '✓ Yes' if result.pension.tpr_total_met else '⚠ No' }}</td></tr>
-            </table>
+
+            {% if stage2_result %}
+              {# Stage 2 result is available — show tick/cross breakdown #}
+              {% for flag in pension_er_flags %}
+                <div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>
+              {% endfor %}
+              {% if stage2_result.error %}
+                <div class="flag-box warning"><div class="flag-title">More Information Needed</div>{{ stage2_result.error }}</div>
+              {% else %}
+                {% if stage2_result.underpaid %}
+                <div class="flag-box error" style="margin-bottom:1rem">
+                  <div class="flag-title">Employer Pension Underpayment Found</div>
+                  {{ stage2_result.underpaid_message if stage2_result.underpaid_message else stage2_result.message }}
+                </div>
+                {% endif %}
+                <table class="breakdown-table">
+                  <tr><td>Pension basis</td><td>{{ result.pension.basis }}</td></tr>
+                  <tr><td>Pensionable pay</td><td>£{{ result.pension.pensionable_pay|currency }}</td></tr>
+                  <tr><td>Employer contribution (expected)</td><td>£{{ stage2_result.expected_er|round(2) if stage2_result.expected_er else result.pension.er_true|currency }}</td></tr>
+                  <tr class="total-row"><td>Employer contribution on payslip</td><td>£{{ result.pension.er_true|currency }}</td></tr>
+                  <tr><td>TPR minimums met</td><td>{{ '✓ Yes' if (stage2_result.tpr_met if stage2_result.tpr_met is defined else result.pension.tpr_total_met) else '⚠ No' }}</td></tr>
+                </table>
+                {# Allow editing the figures #}
+                <div style="margin-top:1rem;border-top:1px solid var(--lilac-mid);padding-top:1rem">
+                  <button class="btn btn-ghost btn-sm" onclick="toggleStage2Form()">Edit figures</button>
+                </div>
+              {% endif %}
+              <div id="stage2-form-wrapper" style="display:none;margin-top:1rem;border-top:1px solid var(--lilac-mid);padding-top:1rem">
+            {% else %}
+              {# No result yet — show the form #}
+              {% for flag in pension_er_flags %}
+                <div class="flag-box {{ flag.severity }}"><div class="flag-title">{{ flag.code | replace('_',' ') }}</div>{{ flag.message }}</div>
+              {% endfor %}
+              <div id="stage2-form-wrapper">
+            {% endif %}
+
+              {# ---- STAGE 2 FORM (inline) ---- #}
+              <p style="font-size:0.875rem;color:var(--muted);margin-bottom:1.25rem">
+                Enter your normal salary and pension contribution rates from a payslip
+                <strong>before</strong> you went on leave.
+              </p>
+              <form method="POST" action="{{ url_for('stage2_parental') }}" id="stage2-form">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.25rem">
+                  <div class="form-group">
+                    <label>Monthly salary (£)</label>
+                    <input type="number" step="0.01" name="salary_monthly" placeholder="e.g. 2500.00"
+                      value="{{ stage2_inputs.get('salary_monthly','') if stage2_inputs else '' }}">
+                  </div>
+                  <div class="form-group">
+                    <label>Weekly salary (£)</label>
+                    <input type="number" step="0.01" name="salary_weekly" placeholder="e.g. 576.92"
+                      value="{{ stage2_inputs.get('salary_weekly','') if stage2_inputs else '' }}">
+                  </div>
+                  <div class="form-group">
+                    <label>Annual salary (£)</label>
+                    <input type="number" step="0.01" name="salary_annual" placeholder="e.g. 30000.00"
+                      value="{{ stage2_inputs.get('salary_annual','') if stage2_inputs else '' }}">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom:1.25rem">
+                  <label>Is your pension normally deducted as a salary sacrifice?</label>
+                  <select name="is_salary_sacrifice" id="sal-sac-select" onchange="updatePensionLabels()">
+                    {% set s2_sac = stage2_inputs.get('is_salary_sacrifice','no') if stage2_inputs else 'no' %}
+                    <option value="no" {{ 'selected' if s2_sac == 'no' }}>No</option>
+                    <option value="yes" {{ 'selected' if s2_sac == 'yes' }}>Yes</option>
+                    <option value="unknown" {{ 'selected' if s2_sac == 'unknown' }}>Don't know (treated as No)</option>
+                  </select>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+                  <div class="form-group" id="ee-pension-group">
+                    <label>Employee contribution %</label>
+                    <input type="number" step="0.5" min="0" max="100" name="pre_leave_ee_pct"
+                      id="pre_leave_ee_pct" placeholder="e.g. 5"
+                      value="{{ stage2_inputs.get('pre_leave_ee_pct','') if stage2_inputs else '' }}">
+                  </div>
+                  <div class="form-group">
+                    <label id="er-pension-label">Employer contribution %</label>
+                    <p id="er-pension-hint" style="font-size:0.75rem;color:var(--muted);margin:-0.5rem 0 0.5rem;display:none">
+                      For salary sacrifice: enter the combined % (your sacrifice + employer's %)
+                    </p>
+                    <input type="number" step="0.5" min="0" max="100" name="pre_leave_er_pct"
+                      placeholder="e.g. 3"
+                      value="{{ stage2_inputs.get('pre_leave_er_pct','') if stage2_inputs else '' }}">
+                  </div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem">
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="clearStage2()">Clear Data</button>
+                  <button type="submit" class="btn btn-primary">Calculate Expected Employer Contribution</button>
+                </div>
+              </form>
+
+            </div>{# end stage2-form-wrapper #}
           </td>
         </tr>
-        {% endif %}
         {% endif %}
 
       </tbody>
@@ -507,148 +596,6 @@
     </div>
   {% endfor %}
 
-  {# ---- STAGE 2 — Parental pay ---- #}
-  {% set parental_flag = result.flags | selectattr('code','equalto','PARENTAL_PAY_STAGE2_PROMPT') | list %}
-  {% if parental_flag %}
-  <div class="result-card" id="stage2-card" style="border-color:#0d9488">
-    <div class="result-card-header" onclick="toggleCard(this)" style="background:#0d9488">
-      <h3 style="color:white">For a More Accurate Result</h3>
-      <div class="result-status"><span style="color:white;font-size:0.8rem">Optional — enter pre-leave details</span><span class="chevron" style="color:white">▼</span></div>
-    </div>
-    <div class="result-card-body">
-      <p style="font-size:0.875rem;color:#475569;margin-bottom:1.5rem">
-        We've detected parental pay on your payslip. Enter the figures from a payslip
-        <strong>before</strong> you went on leave for a more accurate pension check.
-      </p>
-      <form method="POST" action="{{ url_for('stage2_parental') }}" id="stage2-form">
-
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.25rem">
-          <div class="form-group">
-            <label>Monthly salary (£)</label>
-            <input type="number" step="0.01" name="salary_monthly" placeholder="e.g. 2500.00"
-              value="{{ stage2_inputs.get('salary_monthly','') if stage2_inputs else '' }}">
-          </div>
-          <div class="form-group">
-            <label>Weekly salary (£)</label>
-            <input type="number" step="0.01" name="salary_weekly" placeholder="e.g. 576.92"
-              value="{{ stage2_inputs.get('salary_weekly','') if stage2_inputs else '' }}">
-          </div>
-          <div class="form-group">
-            <label>Annual salary (£)</label>
-            <input type="number" step="0.01" name="salary_annual" placeholder="e.g. 30000.00"
-              value="{{ stage2_inputs.get('salary_annual','') if stage2_inputs else '' }}">
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom:1.25rem">
-          <label>Is your pension normally deducted as a salary sacrifice?</label>
-          <select name="is_salary_sacrifice" id="sal-sac-select" onchange="updatePensionLabels()">
-            {% set s2_sac = stage2_inputs.get('is_salary_sacrifice','no') if stage2_inputs else 'no' %}
-            <option value="no" {{ 'selected' if s2_sac == 'no' }}>No</option>
-            <option value="yes" {{ 'selected' if s2_sac == 'yes' }}>Yes</option>
-            <option value="unknown" {{ 'selected' if s2_sac == 'unknown' }}>Don't know (treated as No)</option>
-          </select>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
-          <div class="form-group" id="ee-pension-group">
-            <label>Employee pension shown on old payslip (£)</label>
-            <input type="number" step="0.01" name="pre_leave_ee_pension"
-              id="pre_leave_ee_pension"
-              placeholder="e.g. 125.00"
-              value="{{ stage2_inputs.get('pre_leave_ee_pension','') if stage2_inputs else '' }}">
-          </div>
-          <div class="form-group">
-            <label id="er-pension-label">Employer pension shown on old payslip (£)</label>
-            <p id="er-pension-hint" style="font-size:0.75rem;color:var(--muted);margin:-0.5rem 0 0.5rem;display:none">
-              For Sage/BrightPay salary sacrifice: enter the full combined figure shown
-              (your sacrifice amount + employer's contribution)
-            </p>
-            <input type="number" step="0.01" name="pre_leave_er_pension"
-              placeholder="e.g. 75.00"
-              value="{{ stage2_inputs.get('pre_leave_er_pension','') if stage2_inputs else '' }}">
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;flex-wrap:wrap;gap:0.75rem">
-          <button type="button" class="btn btn-ghost btn-sm" onclick="clearStage2()">Clear Data</button>
-          <button type="submit" class="btn btn-primary">Calculate Expected Employer Contribution</button>
-        </div>
-
-      </form>
-    </div>
-  </div>
-  {% endif %}
-
-  {% if stage2_result %}
-  {% if stage2_result.error %}
-    {# Error entering data #}
-    <div class="flag-box warning" style="margin-bottom:0.75rem">
-      <div class="flag-title">More Information Needed</div>
-      {{ stage2_result.error }}
-    </div>
-  {% elif stage2_result.structured %}
-    {# Structured payline-card result #}
-    <div class="payline-card" style="border-color: {% if stage2_result.underpaid %}var(--red){% else %}#2e7d32{% endif %}">
-      <div class="payline-card-header" style="background: {% if stage2_result.underpaid %}var(--red){% else %}#2e7d32{% endif %}">
-        Employer Pension Check
-      </div>
-      <table class="payline-table">
-        <thead><tr>
-          <th style="width:30%">Description</th>
-          <th style="width:28%">Type</th>
-          <th style="width:20%" class="th-right">Amount (£)</th>
-          <th style="width:10%"></th>
-          <th style="width:12%"></th>
-        </tr></thead>
-        <tbody>
-          <tr class="payline-row {% if stage2_result.underpaid %}payline-row--error{% endif %}"
-              onclick="togglePanel('stage2-detail')" style="cursor:pointer">
-            <td class="payline-desc">Employer Pension</td>
-            <td class="payline-type"><span class="type-pill">{{ stage2_result.pension_type }}</span></td>
-            <td class="payline-amount">£{{ stage2_result.expected_combined|round(2) }}</td>
-            <td class="payline-status">
-              {% if stage2_result.underpaid %}
-                <span class="mock-cross">✘</span>
-              {% else %}
-                <span class="mock-tick">✔</span>
-              {% endif %}
-            </td>
-            <td class="payline-expand"><span class="chevron" id="chev-stage2-detail">▼</span></td>
-          </tr>
-          <tr class="payline-detail-row" id="panel-stage2-detail" style="display:none">
-            <td colspan="5" class="payline-detail-cell">
-              {% if stage2_result.underpaid %}
-              <div class="flag-box error" style="margin-bottom:1rem">
-                <div class="flag-title">Employer Pension Underpayment Found</div>
-                {{ stage2_result.underpaid_message }}
-              </div>
-              {% endif %}
-              <table class="breakdown-table">
-                <tr><td>Pension Type</td><td>{{ stage2_result.pension_type }}</td></tr>
-                <tr><td>Pension Basis</td><td>{{ stage2_result.basis }}</td></tr>
-                <tr><td>Pre-leave pay (per {{ stage2_result.frequency | replace('monthly','month') | replace('weekly','week') }})</td><td>£{{ stage2_result.pre_leave_pay|round(2) }}</td></tr>
-                <tr><td>Employee contribution (expected)</td><td>{{ stage2_result.ee_pct }}% &nbsp; £{{ stage2_result.expected_ee|round(2) }}</td></tr>
-                <tr><td>Employer contribution (expected)</td><td>{{ stage2_result.er_pct }}% &nbsp; £{{ stage2_result.expected_er|round(2) }}</td></tr>
-                {% if stage2_result.is_salary_sacrifice %}
-                <tr class="total-row"><td>Total Employer contribution (expected)<br><small style="font-weight:400;color:var(--muted)">Employee + Employer (combined Salary Sacrifice)</small></td>
-                  <td>{{ stage2_result.total_pct|round(0)|int }}% &nbsp; £{{ stage2_result.expected_combined|round(2) }}</td></tr>
-                {% endif %}
-                <tr class="total-row"><td>TPR minimums met</td><td>{{ '✓ Yes' if stage2_result.tpr_met else '⚠ No' }}</td></tr>
-              </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  {% else %}
-    {# Legacy text fallback #}
-    <div class="flag-box {{ 'error' if stage2_result.underpaid else 'info' }}" style="margin-bottom:0.75rem">
-      <div class="flag-title">{{ 'Employer Pension Underpayment Found' if stage2_result.underpaid else 'Employer Pension Check' }}</div>
-      {{ stage2_result.message }}
-    </div>
-  {% endif %}
-  {% endif %}
 
   <div style="text-align:center;margin-top:2.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
     <a href="{{ url_for('upload') }}" class="btn btn-ghost">Scan Another Payslip</a>
@@ -674,17 +621,10 @@ function toggleCard(header) {
   body.classList.toggle('open');
   chevron.classList.toggle('open');
 }
-function openStage2() {
-  const card = document.getElementById('stage2-card');
-  if (!card) return;
-  const body = card.querySelector('.result-card-body');
-  const header = card.querySelector('.result-card-header');
-  if (body && !body.classList.contains('open')) {
-    body.classList.add('open');
-    const chev = header ? header.querySelector('.chevron') : null;
-    if (chev) chev.classList.add('open');
-  }
-  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+function toggleStage2Form() {
+  const wrapper = document.getElementById('stage2-form-wrapper');
+  if (!wrapper) return;
+  wrapper.style.display = wrapper.style.display === 'none' ? 'block' : 'none';
 }
 function clearStage2() {
   const form = document.getElementById('stage2-form');
@@ -696,20 +636,30 @@ function clearStage2() {
 function updatePensionLabels() {
   const sel = document.getElementById('sal-sac-select');
   const eeGroup = document.getElementById('ee-pension-group');
-  const eeInput = document.getElementById('pre_leave_ee_pension');
+  const eeInput = document.getElementById('pre_leave_ee_pct');
   const erHint  = document.getElementById('er-pension-hint');
   const erLabel = document.getElementById('er-pension-label');
   if (!sel) return;
   const isSalSac = sel.value === 'yes';
-  // Hide Ee field for salary sacrifice — combined rate approach used instead
-  if (eeGroup) eeGroup.style.display = isSalSac ? 'none' : 'block';
-  if (eeInput && isSalSac) eeInput.value = '';  // clear so it isn't submitted
-  // Show hint on Er field explaining combined figure
+  // For salary sacrifice: Ee % still shown — user enters their sacrifice %
+  // Er % label changes to explain combined rate
+  if (eeGroup) eeGroup.style.display = 'block';
   if (erHint) erHint.style.display = isSalSac ? 'block' : 'none';
   if (erLabel) erLabel.textContent = isSalSac
-    ? 'Combined employer pension shown on old payslip (£)'
-    : 'Employer pension shown on old payslip (£)';
+    ? 'Employer contribution %'
+    : 'Employer contribution %';
 }
-document.addEventListener('DOMContentLoaded', updatePensionLabels);
+document.addEventListener('DOMContentLoaded', function() {
+  updatePensionLabels();
+  {% if stage2_result %}
+  // Auto-open employer pension panel to show the result
+  const panel = document.getElementById('panel-pension-er-detail');
+  const chev  = document.getElementById('chev-pension-er-detail');
+  if (panel) {
+    panel.style.display = 'table-row';
+    if (chev) chev.classList.add('open');
+  }
+  {% endif %}
+});
 </script>
 {% endblock %}
