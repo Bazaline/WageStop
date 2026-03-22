@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Payslip Review — PayBlur{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Payslip Review</h1>
+  <p>Your uploaded payslip results. Log in to access your full history.</p>
+</div>
+
+<div class="review-results-wrap">
+
+  {# ---- Current session result ---- #}
+  {% if result %}
+  <div class="review-session-block">
+    <div class="review-session-header">
+      <span class="review-session-label">Current Scan</span>
+      <span class="review-session-meta">
+        {{ result.tax_year }} &nbsp;·&nbsp;
+        {{ result.pay_frequency | title }} &nbsp;·&nbsp;
+        Tax Code: {{ result.tax_breakdown.tax_code }}
+      </span>
+    </div>
+
+    <div class="review-cards-grid">
+
+      {# Overview card #}
+      <div class="review-data-card">
+        <div class="review-data-card-title">Overview</div>
+        <table class="breakdown-table">
+          <tr><td>Gross for Tax</td><td>£{{ result.gross_for_tax|currency }}</td></tr>
+          <tr><td>Earnings for NI</td><td>£{{ result.earnings_for_ni|currency }}</td></tr>
+          <tr><td>Income Tax</td><td>£{{ result.tax_expected|currency }}</td></tr>
+          <tr><td>National Insurance</td><td>£{{ result.ee_ni_expected|currency }}</td></tr>
+          {% if result.pension.type %}
+          <tr><td>Pension</td><td>£{{ result.pension.ee_expected|currency }}</td></tr>
+          {% endif %}
+          <tr class="total-row"><td>Net Pay (calculated)</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
+        </table>
+      </div>
+
+      {# Findings card #}
+      <div class="review-data-card">
+        <div class="review-data-card-title">Findings</div>
+        {% set errors = result.flags | selectattr('severity','equalto','error') | list %}
+        {% set warnings = result.flags | selectattr('severity','equalto','warning') | list %}
+        {% set infos = result.flags | selectattr('severity','equalto','info') | list %}
+
+        {% if not errors and not warnings %}
+          <div class="review-all-clear">
+            <span>✓</span> All calculations look correct
+          </div>
+        {% endif %}
+
+        {% for flag in errors %}
+          {% if flag.code != 'PARENTAL_PAY_STAGE2_PROMPT' %}
+          <div class="review-finding review-finding--error">
+            <div class="review-finding-label">{{ flag.code | replace('_',' ') }}</div>
+            <div class="review-finding-msg">{{ flag.message }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+
+        {% for flag in warnings %}
+          {% if flag.code != 'PARENTAL_PAY_STAGE2_PROMPT' %}
+          <div class="review-finding review-finding--warning">
+            <div class="review-finding-label">{{ flag.code | replace('_',' ') }}</div>
+            <div class="review-finding-msg">{{ flag.message }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+
+        {% for flag in infos %}
+          {% if flag.code != 'PARENTAL_PAY_STAGE2_PROMPT' %}
+          <div class="review-finding review-finding--info">
+            <div class="review-finding-label">{{ flag.code | replace('_',' ') }}</div>
+            <div class="review-finding-msg">{{ flag.message }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+    </div>{# end review-cards-grid #}
+
+    <div class="review-session-actions">
+      <a href="{{ url_for('results') }}" class="btn btn-ghost btn-sm">View Full Results</a>
+      <a href="{{ url_for('upload') }}" class="btn btn-primary btn-sm">Scan Another Payslip</a>
+    </div>
+  </div>
+  {% endif %}
+
+  {# ---- Login prompt for history ---- #}
+  <div class="review-login-prompt">
+    <div class="review-login-icon">🔒</div>
+    <div class="review-login-text">
+      <h3>View Your Full History</h3>
+      <p>Log in to access all your previous payslip scans in one place. Track changes over time and keep a record of any issues found.</p>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap">
+        <a href="#" class="btn btn-primary btn-sm">Log In</a>
+        <a href="#" class="btn btn-ghost btn-sm">Create Account</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

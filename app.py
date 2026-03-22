@@ -522,5 +522,15 @@ def contacts():
     return render_template("contacts.html")
 
 
+# ---------------------------------------------------------------------------
+# PAYSLIP REVIEW
+# ---------------------------------------------------------------------------
+
+@app.route("/payslip-review")
+def payslip_review():
+    result = session.get("validation_result")
+    return render_template("payslip_review.html", result=result)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
