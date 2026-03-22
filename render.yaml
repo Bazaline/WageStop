@@ -9,7 +9,3 @@ services:
         generateValue: true
       - key: ANTHROPIC_API_KEY
         sync: false
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
