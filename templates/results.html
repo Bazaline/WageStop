@@ -431,14 +431,19 @@
   </div>
   {% endif %}
 
-  {# ---- NET PAY ---- #}
+  {# ---- TAKE HOME PAY ---- #}
   <div class="payline-card payline-card--net">
+    <div class="payline-card-header">Take Home Pay</div>
     <table class="payline-table">
+      <thead><tr>
+        <th style="width:30%">Description</th><th style="width:28%">Type</th>
+        <th style="width:20%" class="th-right">Amount (£)</th><th style="width:10%"></th><th style="width:12%"></th>
+      </tr></thead>
       <tbody>
-        <tr onclick="togglePanel('net-detail')" style="cursor:pointer">
+        <tr class="payline-row" onclick="togglePanel('net-detail')" style="cursor:pointer">
           <td class="payline-desc">Net Pay</td>
           <td class="payline-type"></td>
-          <td class="payline-amount">£{{ result.net_pay_expected|currency }}</td>
+          <td class="payline-amount" style="font-weight:800">£{{ result.net_pay_expected|currency }}</td>
           <td class="payline-status">
             {% if result.net_pay_variance < 0.05 %}<span class="mock-tick">✔</span>
             {% else %}<span class="mock-cross">✘</span>{% endif %}
