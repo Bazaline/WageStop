@@ -143,10 +143,15 @@ def parse_tax_code(tax_code: str) -> dict:
             code = code[:-1]
         result["suffix"] = suffix
 
+    # Strip whitespace left by space-separated codes e.g. "K407 M1" -> "407 " -> "407"
+    code = code.strip()
+
     # Extract suffix (L, M, N, T)
-    if not result["suffix"] and code and code[-1] in ("L", "M", "N", "T"):
-        result["suffix"] = code[-1]
-        code = code[:-1]
+    # Must strip even if emergency suffix already found — e.g. "1257L M1" still has an L
+    if code and code[-1] in ("L", "M", "N", "T"):
+        if not result["suffix"]:
+            result["suffix"] = code[-1]   # Only record it if we haven't already (M1/W1/X)
+        code = code[:-1]                  # Always strip the letter so the number is clean
 
     # Extract number
     if code.isdigit():
@@ -412,6 +417,34 @@ def calculate_tax(gross_for_tax: float,
     is_k = parsed["is_k"]
     is_emergency = parsed["is_emergency"]
     is_scottish = parsed["is_scottish"]
+
+    # Guard: if code number could not be parsed, treat as 0T (no free pay)
+    if code_number is None:
+        ytd_taxable_rounded = math.floor(ytd_gross_for_tax)
+        if is_scottish:
+            ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config)
+        else:
+            ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config)
+        prior_ytd = ytd_gross_for_tax - gross_for_tax
+        prior_taxable_rounded = math.floor(prior_ytd)
+        if is_scottish:
+            prior_tax, _ = apply_scottish_bands(prior_taxable_rounded, config)
+        else:
+            prior_tax, _ = apply_england_wales_bands(prior_taxable_rounded, config)
+        tax_this_period = round(max(0, ytd_tax - prior_tax), 2)
+        cap_limit = round(gross_for_tax * 0.50, 2)
+        cap_applied = tax_this_period > cap_limit
+        if cap_applied:
+            tax_this_period = cap_limit
+        return TaxBreakdown(
+            tax_code=tax_code, is_k_code=False, is_emergency=is_emergency,
+            is_scottish=is_scottish, free_pay_annual=0, free_pay_period=0,
+            k_addition=None, ytd_gross_for_tax=ytd_gross_for_tax,
+            ytd_taxable=ytd_gross_for_tax, ytd_taxable_rounded=ytd_taxable_rounded,
+            bands_applied=bands, ytd_tax_calculated=ytd_tax,
+            prior_period_tax=round(prior_tax, 2), tax_this_period=tax_this_period,
+            cap_applied=cap_applied, cap_limit=cap_limit if cap_applied else None,
+        )
 
     free_pay_period, workings = calculate_free_pay(
         code_number, tax_period, is_emergency, is_k, frequency
