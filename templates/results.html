@@ -358,11 +358,16 @@
         <tr class="payline-row {% if pension_er_error %}payline-row--error{% elif stage2_pending %}payline-row--warning{% endif %}"
             onclick="togglePanel('pension-er-detail')" style="cursor:pointer">
           <td class="payline-desc">Employer Pension</td>
-          <td class="payline-type"><span class="type-pill">{{ result.pension.type }}</span></td>
+          <td class="payline-type">
+            <span class="type-pill">{{ result.pension.type }}</span>
+            {% if stage2_pending %}
+              <span class="er-further-badge" style="margin-left:0.4rem">Further data required</span>
+            {% endif %}
+          </td>
           <td class="payline-amount">£{{ result.pension.er_true|currency }}</td>
           <td class="payline-status">
             {% if stage2_pending %}
-              <span class="er-further-badge">Further data required</span>
+              {# badge shown in type column — leave status empty #}
             {% elif stage2_result and stage2_result.underpaid %}<span class="mock-cross">✘</span>
             {% elif stage2_result and not stage2_result.underpaid %}<span class="mock-tick">✔</span>
             {% elif pension_er_error %}<span class="mock-cross">✘</span>

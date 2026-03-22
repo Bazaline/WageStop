@@ -294,7 +294,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
 .payline-expand { text-align: center; width: 36px; color: var(--lilac-lt); }
 
 .type-pill { display: inline-block; background: var(--lilac-pale); color: var(--lilac); border: 1px solid var(--lilac-mid); border-radius: 20px; padding: 0.15rem 0.6rem; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
-.er-further-badge { display: inline-block; background: #fde8e8; color: var(--red); border: 1px solid #f5c0c0; border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.er-further-badge { display: inline-flex; align-items: center; background: #fde8e8; color: var(--red); border: 1px solid #f5c0c0; border-radius: 6px; padding: 0.2rem 0.5rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; cursor: pointer; vertical-align: middle; }
 .chevron--alert { color: var(--red) !important; font-weight: 900; }
 
 .payline-detail-row td { padding: 0 !important; border-bottom: 1px solid var(--lilac-mid) !important; }
