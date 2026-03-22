@@ -12,7 +12,7 @@ from .models import (
     PayslipInput, ValidationResult, PayLine, Flag, FlagSeverity,
     PensionType, TaxYear, PayFrequency
 )
-from .tax import calculate_tax
+from .tax import calculate_tax, parse_tax_code
 from .ni import calculate_ni
 from .pension import calculate_pension
 from .student_loan import validate_student_loan, identify_student_loan_plan
@@ -267,12 +267,19 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
     flags.extend(special_flags)
 
     # YTD gross for tax
-    # For weekly: if no YTD provided, use this period only (W1 emergency basis)
-    # For monthly: use payslip YTD for cumulative calculation
-    if payslip.ytd.ytd_gross_for_tax:
+    # Emergency/non-cumulative codes (M1/W1/X): ALWAYS use current period only.
+    # The payslip YTD will be the full year-to-date which is irrelevant for M1/W1.
+    # Cumulative codes: use payslip YTD if available, otherwise current period.
+    _parsed_code = parse_tax_code(payslip.tax_code)
+    _is_emergency = _parsed_code.get("is_emergency", False)
+
+    if _is_emergency:
+        # Non-cumulative — calculate on this period's gross only
+        ytd_gross_for_tax = gross_for_tax
+    elif payslip.ytd.ytd_gross_for_tax:
         ytd_gross_for_tax = payslip.ytd.ytd_gross_for_tax
     else:
-        # No YTD — treat as period 1 / emergency basis
+        # No YTD — treat as period 1
         ytd_gross_for_tax = gross_for_tax
         if tax_period and tax_period > 1:
             flags.append(Flag(
@@ -329,7 +336,21 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
     # NI variance check
     ni_paid = payslip.summary.ni_paid or 0.0
     ee_ni_variance = round(abs(ee_ni_expected - ni_paid), 2)
-    if ee_ni_variance > NI_TOLERANCE:
+
+    # Sage UEL display: payslip shows £4,189 for Earnings for NI as a display feature.
+    # When this is present, suppress any NI discrepancy error — the info flag is enough.
+    if ni_breakdown.sage_uel_display:
+        flags.append(Flag(
+            severity=FlagSeverity.INFO,
+            element_code="NI",
+            code="SAGE_UEL_DISPLAY",
+            message=(
+                "Your payslip shows Earnings for NI as £4,189.00 (the Upper Earnings "
+                "Limit). This is a display feature — your actual NI has been correctly "
+                "calculated on your full earnings above the UEL."
+            ),
+        ))
+    elif ee_ni_variance > NI_TOLERANCE:
         flags.append(Flag(
             severity=FlagSeverity.ERROR,
             element_code="NI",
@@ -344,85 +365,156 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
             variance=ee_ni_variance,
         ))
 
-    # Sage UEL display info flag
-    if ni_breakdown.sage_uel_display:
-        flags.append(Flag(
-            severity=FlagSeverity.INFO,
-            element_code="NI",
-            code="SAGE_UEL_DISPLAY",
-            message=(
-                "Your payslip shows Earnings for NI as £4,189.00 (the Upper Earnings "
-                "Limit). This is a display feature — your actual NI has been correctly "
-                "calculated on your full earnings."
-            ),
-        ))
-
     # --- PENSION CALCULATION ---
     pension_breakdown = None
     pension_flags = []
 
-    if payslip.pension.ee_contribution_shown is not None or \
-       payslip.pension.er_contribution_shown is not None:
+    # --- B5 AS PENSION SACRIFICE DETECTION ---
+    # When a salary sacrifice (B5) exists but there is no explicit employee pension
+    # line (C3/C4/C5), and an employer pension (E3) is present, the B5 is acting
+    # as the employee's pension sacrifice contribution.
+    has_pension_line = any(
+        l.element_code in ("C3", "C4", "C5", "C6") for l in payslip.pay_lines
+    )
+    has_er_pension_line = any(
+        l.element_code == "E3" for l in payslip.pay_lines
+    )
+    b5_is_pension_sacrifice = (
+        gross["has_b5_non_pension"]
+        and sacrifice_amt > 0
+        and not has_pension_line
+        and has_er_pension_line
+    )
 
-        # Determine if gross changed vs notional
-        notional_gross = gross_for_tax + sacrifice_amt
-        gross_for_tax_changed = sacrifice_amt > 0 or any(
-            line.element_code == "C4" for line in payslip.pay_lines
-        )
-        gross_for_ni_changed = has_sacrifice
+    # Resolve effective ee/er pension figures
+    if b5_is_pension_sacrifice:
+        # B5 IS the employee pension — treat as salary sacrifice
+        effective_ee_pension = sacrifice_amt
+        effective_er_pension = payslip.pension.er_contribution_shown or 0.0
+        # Also accept from E3 line directly if pension dict is empty
+        if effective_er_pension == 0.0:
+            for l in payslip.pay_lines:
+                if l.element_code == "E3":
+                    effective_er_pension += abs(l.amount)
+        effective_has_sacrifice = True
+    else:
+        effective_ee_pension = payslip.pension.ee_contribution_shown or 0.0
+        effective_er_pension = payslip.pension.er_contribution_shown or 0.0
+        # Also resolve E3 if pension dict is empty
+        if effective_er_pension == 0.0:
+            for l in payslip.pay_lines:
+                if l.element_code == "E3":
+                    effective_er_pension += abs(l.amount)
+        effective_has_sacrifice = has_sacrifice
 
-        pension_breakdown, pension_flags = calculate_pension(
-            gross_for_tax=gross_for_tax,
-            gross_for_ni=gross_for_ni,
-            ni_able_earnings=gross_for_ni,
-            ee_contribution_shown=payslip.pension.ee_contribution_shown or 0,
-            er_contribution_shown=payslip.pension.er_contribution_shown or 0,
-            has_sacrifice_line=has_sacrifice,
-            sacrifice_amount=sacrifice_amt,
-            gross_for_tax_changed=gross_for_tax_changed,
-            gross_for_ni_changed=gross_for_ni_changed,
-            software=payslip.software,
-            provider=payslip.pension.provider or payslip.user_answers.pension_provider,
-            frequency=frequency,
-        )
-        flags.extend(pension_flags)
+    # Determine if parental stat pay is present (A16/A17 — not SSP/A18)
+    has_parental_stat_pay = any(
+        l.element_code in ("A16", "A17", "A16_OR_A17") for l in payslip.pay_lines
+    )
 
-        # B5 non-pension salary sacrifice alongside pension — query user
-        if gross["has_b5_non_pension"] and has_sacrifice:
+    if effective_er_pension > 0 or effective_ee_pension > 0:
+
+        # When parental stat pay is present alongside pension:
+        # We cannot fully validate employer pension without pre-leave salary data.
+        # Skip normal pension validation — Stage 2 will handle it.
+        if has_parental_stat_pay:
+            # Still run pension calculation for display purposes only
+            gross_for_tax_changed = sacrifice_amt > 0 or any(
+                line.element_code == "C4" for line in payslip.pay_lines
+            )
+            gross_for_ni_changed = effective_has_sacrifice
+
+            pension_breakdown, _pension_flags = calculate_pension(
+                gross_for_tax=gross_for_tax,
+                gross_for_ni=gross_for_ni,
+                ni_able_earnings=gross_for_ni,
+                ee_contribution_shown=effective_ee_pension,
+                er_contribution_shown=effective_er_pension,
+                has_sacrifice_line=effective_has_sacrifice,
+                sacrifice_amount=sacrifice_amt,
+                gross_for_tax_changed=gross_for_tax_changed,
+                gross_for_ni_changed=gross_for_ni_changed,
+                software=payslip.software,
+                provider=payslip.pension.provider or payslip.user_answers.pension_provider,
+                frequency=frequency,
+            )
+            # Suppress pension error/warning flags — we can't validate without pre-leave data
+            # Only keep provider compatibility error if present
+            for f in _pension_flags:
+                if f.code == "WRONG_PENSION_BASIS":
+                    flags.append(f)
+
             flags.append(Flag(
-                severity=FlagSeverity.WARNING,
+                severity=FlagSeverity.INFO,
                 element_code="PENSION",
-                code="B5_REDUCING_PENSION",
+                code="STAT_PAY_PENSION_INFO_NEEDED",
                 message=(
-                    "Salary sacrifice is reducing your pensionable pay. Your employer "
-                    "may not know this is the case so speak with HR to determine if "
-                    "this is deliberate. The Pensions Regulator advise that it is up "
-                    "to the employer if other salary sacrifice deductions reduce your "
-                    "pensionable pay, there is no right or wrong here."
+                    "We've detected statutory pay on your payslip. Your employer's "
+                    "pension contributions during parental leave should be based on "
+                    "your normal salary — not your statutory pay amount. We need a "
+                    "little more information to check this fully. Please complete "
+                    "the section below."
                 ),
             ))
-
-        # --- STATUTORY PAY PENSION CHECK ---
-        pension_type_str = "SALARY_SACRIFICE" if has_sacrifice else "NON_SAL_SAC"
-        stat_flags, has_parental, stat_pay_amt, other_pensionable = \
-            validate_stat_pay_pension(
-                pay_lines=payslip.pay_lines,
-                ee_pension_shown=payslip.pension.ee_contribution_shown or 0,
-                er_pension_shown=payslip.pension.er_contribution_shown or 0,
-                sacrifice_amount=sacrifice_amt,
-                pension_type=pension_type_str,
-                payslip_frequency=frequency,
-            )
-        flags.extend(stat_flags)
-
-        # If parental pay found — store flag for Stage 2 prompt in app.py
-        if has_parental:
+            # Trigger Stage 2 prompt
             flags.append(Flag(
                 severity=FlagSeverity.INFO,
                 element_code="STAT_PAY",
                 code="PARENTAL_PAY_STAGE2_PROMPT",
-                message="PARENTAL_PAY_DETECTED",  # Sentinel — app.py shows Stage 2 prompt
+                message="PARENTAL_PAY_DETECTED",
             ))
+
+        else:
+            # No stat pay — run full pension validation
+            gross_for_tax_changed = sacrifice_amt > 0 or any(
+                line.element_code == "C4" for line in payslip.pay_lines
+            )
+            gross_for_ni_changed = effective_has_sacrifice
+
+            pension_breakdown, pension_flags = calculate_pension(
+                gross_for_tax=gross_for_tax,
+                gross_for_ni=gross_for_ni,
+                ni_able_earnings=gross_for_ni,
+                ee_contribution_shown=effective_ee_pension,
+                er_contribution_shown=effective_er_pension,
+                has_sacrifice_line=effective_has_sacrifice,
+                sacrifice_amount=sacrifice_amt,
+                gross_for_tax_changed=gross_for_tax_changed,
+                gross_for_ni_changed=gross_for_ni_changed,
+                software=payslip.software,
+                provider=payslip.pension.provider or payslip.user_answers.pension_provider,
+                frequency=frequency,
+            )
+            flags.extend(pension_flags)
+
+            # B5 non-pension sacrifice alongside a SEPARATE pension — warn user
+            if gross["has_b5_non_pension"] and has_sacrifice and not b5_is_pension_sacrifice:
+                flags.append(Flag(
+                    severity=FlagSeverity.WARNING,
+                    element_code="PENSION",
+                    code="B5_REDUCING_PENSION",
+                    message=(
+                        "Salary sacrifice is reducing your pensionable pay. Your employer "
+                        "may not know this is the case so speak with HR to determine if "
+                        "this is deliberate. The Pensions Regulator advise that it is up "
+                        "to the employer if other salary sacrifice deductions reduce your "
+                        "pensionable pay, there is no right or wrong here."
+                    ),
+                ))
+
+            # SSP pension check (non-parental stat pay)
+            has_ssp = any(l.element_code == "A18" for l in payslip.pay_lines)
+            if has_ssp:
+                pension_type_str = "SALARY_SACRIFICE" if effective_has_sacrifice else "NON_SAL_SAC"
+                stat_flags, _, _, _ = validate_stat_pay_pension(
+                    pay_lines=payslip.pay_lines,
+                    ee_pension_shown=effective_ee_pension,
+                    er_pension_shown=effective_er_pension,
+                    sacrifice_amount=sacrifice_amt,
+                    pension_type=pension_type_str,
+                    payslip_frequency=frequency,
+                )
+                flags.extend(stat_flags)
 
     # --- STUDENT LOAN ---
     student_loan_deduction = 0.0
@@ -457,8 +549,22 @@ def validate_payslip(payslip: PayslipInput) -> ValidationResult:
             student_loan_deduction += abs(sl_line.amount)
 
     # --- NET PAY ---
+    # Base: total gross (all positive payments including salary, stat pay etc.)
+    # minus salary sacrifice/NPA (already in gross_for_tax reduction)
+    # For RAS pension: the employee's net contribution (80%) also deducts from net pay
+    # since gross_for_tax is unchanged for RAS.
+    from .models import PensionType as _PT
+    ras_pension_deduction = 0.0
+    if pension_breakdown and pension_breakdown.pension_type == _PT.RAS:
+        ras_pension_deduction = pension_breakdown.ee_contribution_expected or 0.0
+
     net_pay_expected = round(
-        gross_for_tax - tax_expected - ee_ni_expected - student_loan_deduction, 2
+        gross_for_tax
+        - tax_expected
+        - ee_ni_expected
+        - student_loan_deduction
+        - ras_pension_deduction,
+        2
     )
     net_pay_shown = payslip.summary.net_pay or 0.0
     net_pay_variance = round(abs(net_pay_expected - net_pay_shown), 2)

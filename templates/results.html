@@ -26,7 +26,7 @@
   </div>
 
   {% if errors %}
-    <div class="summary-status status-error">⚠ {{ errors | length }} issue{{ 's' if errors|length > 1 }} found that need your attention</div>
+    <div class="summary-status status-error">⚠ {{ errors | length }} issue{{ 's' if errors|length > 1 }} found</div>
   {% elif warnings %}
     <div class="summary-status status-warn">ℹ {{ warnings | length }} item{{ 's' if warnings|length > 1 }} to be aware of</div>
   {% else %}
@@ -374,7 +374,7 @@
   <div class="payline-card payline-card--net">
     <table class="payline-table">
       <tbody>
-        <tr>
+        <tr onclick="togglePanel('net-detail')" style="cursor:pointer">
           <td class="payline-desc" style="font-weight:800;font-size:1rem;color:var(--purple-dk)">Net Pay</td>
           <td class="payline-type"></td>
           <td class="payline-amount" style="font-weight:800;font-size:1.05rem;color:var(--purple-dk)">£{{ result.net_pay_expected|currency }}</td>
@@ -382,7 +382,46 @@
             {% if result.net_pay_variance < 0.05 %}<span class="mock-tick">✔</span>
             {% else %}<span class="mock-cross">✘</span>{% endif %}
           </td>
-          <td class="payline-expand"></td>
+          <td class="payline-expand"><span class="chevron" id="chev-net-detail">▼</span></td>
+        </tr>
+        <tr class="payline-detail-row" id="panel-net-detail" style="display:none">
+          <td colspan="5" class="payline-detail-cell">
+            {% if result.net_pay_variance >= 0.05 %}
+            <div class="flag-box error" style="margin-bottom:1rem">
+              <div class="flag-title">NET PAY VARIANCE</div>
+              Our calculated net pay is £{{ result.net_pay_expected|currency }},
+              but your payslip shows £{{ result.net_pay_shown if result.net_pay_shown else '—' }}.
+              Variance: £{{ result.net_pay_variance|currency }}.
+              This may be due to other deductions not visible on your payslip.
+            </div>
+            {% endif %}
+            <table class="breakdown-table">
+              {# Show each payment line #}
+              {% set all_lines = payslip_data.get('confirmed_lines', payslip_data.get('all_lines', [])) %}
+              {% for line in all_lines %}
+                {% if line.element_code not in ('C1','C2','C3','C4','C5','C6','D1','D2','D3','E1','E3','B1','B2','B5') %}
+                  {% if line.amount > 0 %}
+                    <tr><td>{{ line.description }}</td><td>£{{ line.amount|currency }}</td></tr>
+                  {% elif line.amount < 0 %}
+                    <tr><td>{{ line.description }}</td><td style="color:var(--red)">− £{{ (line.amount * -1)|currency }}</td></tr>
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              {# Salary sacrifice if present #}
+              {% for line in all_lines %}
+                {% if line.element_code == 'B5' %}
+                  <tr><td>{{ line.description }} (Salary Sacrifice)</td><td style="color:var(--red)">− £{{ line.amount|abs|currency }}</td></tr>
+                {% endif %}
+              {% endfor %}
+              <tr style="border-top:2px solid var(--lilac-mid)"><td style="font-weight:700;color:var(--purple-dk)">Gross for Tax</td><td style="font-weight:700;color:var(--purple-dk)">£{{ result.gross_for_tax|currency }}</td></tr>
+              <tr><td>Less: Income Tax</td><td style="color:var(--red)">− £{{ result.tax_expected|currency }}</td></tr>
+              <tr><td>Less: National Insurance</td><td style="color:var(--red)">− £{{ result.ee_ni_expected|currency }}</td></tr>
+              {% if result.pension and result.pension.type == 'Relief at Source (RAS)' %}
+                <tr><td>Less: Pension (employee)</td><td style="color:var(--red)">− £{{ result.pension.ee_expected|currency }}</td></tr>
+              {% endif %}
+              <tr class="total-row"><td>Net Pay (calculated)</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
+            </table>
+          </td>
         </tr>
       </tbody>
     </table>
