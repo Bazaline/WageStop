@@ -14,6 +14,16 @@
     <h2>Overview</h2>
     {% set errors = result.flags | selectattr('severity','equalto','error') | list %}
     {% set warnings = result.flags | selectattr('severity','equalto','warning') | list %}
+
+    <table class="breakdown-table">
+      <tr><td>Tax Year</td><td>{{ result.tax_year }}</td></tr>
+      <tr><td>Pay Frequency</td><td>{{ result.pay_frequency | title }}</td></tr>
+      <tr><td>Tax Code</td><td>{{ result.tax_breakdown.tax_code }}</td></tr>
+      <tr><td>Gross for Tax</td><td>£{{ result.gross_for_tax|currency }}</td></tr>
+      <tr><td>Earnings for NI</td><td>£{{ result.earnings_for_ni|currency }}</td></tr>
+      <tr class="total-row"><td>Net Pay (calculated)</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
+    </table>
+
     {% if errors %}
       <div class="summary-status status-error">⚠ {{ errors | length }} issue{{ 's' if errors|length > 1 }} found that need your attention</div>
     {% elif warnings %}
@@ -21,15 +31,6 @@
     {% else %}
       <div class="summary-status status-ok">✓ All calculations look correct</div>
     {% endif %}
-
-    <table class="breakdown-table" style="color:white">
-      <tr><td>Tax Year</td><td>{{ result.tax_year }}</td></tr>
-      <tr><td>Pay Frequency</td><td>{{ result.pay_frequency | title }}</td></tr>
-      <tr><td>Tax Code</td><td>{{ result.tax_breakdown.tax_code }}</td></tr>
-      <tr><td>Gross for Tax</td><td>£{{ result.gross_for_tax|currency }}</td></tr>
-      <tr><td>Earnings for NI</td><td>£{{ result.earnings_for_ni|currency }}</td></tr>
-      <tr class="total-row" style="color:white"><td>Net Pay (calculated)</td><td>£{{ result.net_pay_expected|currency }}</td></tr>
-    </table>
   </div>
 
   {# TAX #}
