@@ -16,12 +16,17 @@ from .models import TaxBreakdown, TaxYear
 
 TAX_CONFIG = {
     TaxYear.Y2024_25: {
+        # Monthly band ceilings — scaled by tax period for cumulative codes.
+        # HMRC Table B manual method: ceiling = monthly value × tax period.
+        # Emergency (M1/W1/X) codes always use period 1.
         "monthly_basic_ceiling": 3141.67,       # £37,700 ÷ 12
-        "monthly_higher_ceiling": 10428.33,     # £125,140 ÷ 12 (was lower)
+        "monthly_higher_ceiling": 10428.33,     # £125,140 ÷ 12
         "basic_rate": 0.20,
         "higher_rate": 0.40,
         "additional_rate": 0.45,
         "batch_annual": 5000.04,
+        # Scottish bands: monthly thresholds, scaled by cumul_period at runtime.
+        # cumul = tax already due at start of each band (also monthly, scaled at runtime).
         "scottish_bands": [
             {"name": "Starter",      "from": 0.01,    "to": 192.17,  "rate": 0.19, "cumul": 0.00},
             {"name": "Basic",        "from": 192.18,  "to": 1165.92, "rate": 0.20, "cumul": 36.51},
@@ -228,13 +233,16 @@ def calculate_free_pay(code_number: int, tax_period: int,
 # ---------------------------------------------------------------------------
 
 def apply_england_wales_bands(ytd_taxable_rounded: int,
-                               config: dict) -> Tuple[float, List[dict]]:
+                               config: dict,
+                               cumul_period: int = 1) -> Tuple[float, List[dict]]:
     """
     Apply England/Wales tax bands to rounded YTD taxable pay.
+    HMRC Table B manual method: ceiling = monthly value × cumul_period.
+    Emergency (M1/W1/X) codes pass cumul_period=1; cumulative codes pass tax_period.
     Returns (ytd_tax, bands_applied)
     """
-    basic_ceil = config["monthly_basic_ceiling"]
-    higher_ceil = config["monthly_higher_ceiling"]
+    basic_ceil = config["monthly_basic_ceiling"] * cumul_period
+    higher_ceil = config["monthly_higher_ceiling"] * cumul_period
     bands = []
     ytd_tax = 0.0
 
@@ -285,9 +293,12 @@ def apply_england_wales_bands(ytd_taxable_rounded: int,
 # ---------------------------------------------------------------------------
 
 def apply_scottish_bands(ytd_taxable_rounded: int,
-                          config: dict) -> Tuple[float, List[dict]]:
+                          config: dict,
+                          cumul_period: int = 1) -> Tuple[float, List[dict]]:
     """
     Apply Scottish tax bands to rounded YTD taxable pay.
+    HMRC Table B manual method: band boundaries and cumul tax scale by cumul_period.
+    Emergency (M1/W1/X) codes pass cumul_period=1; cumulative codes pass tax_period.
     Returns (ytd_tax, bands_applied)
     """
     bands_applied = []
@@ -299,10 +310,10 @@ def apply_scottish_bands(ytd_taxable_rounded: int,
     scottish_bands = config["scottish_bands"]
 
     for band in scottish_bands:
-        band_from = band["from"]
-        band_to = band["to"]
+        band_from = band["from"] * cumul_period
+        band_to = band["to"] * cumul_period if band["to"] is not None else None
         rate = band["rate"]
-        cumul = band["cumul"]
+        cumul = band["cumul"] * cumul_period
 
         if ytd_taxable_rounded < band_from:
             break
@@ -387,16 +398,17 @@ def calculate_tax(gross_for_tax: float,
         # Zero allowance — tax from £0 using normal bands
         ytd_taxable_rounded = math.floor(ytd_gross_for_tax)
         if parsed["is_scottish"]:
-            ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config)
+            ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config, tax_period)
         else:
-            ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config)
+            ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config, tax_period)
 
         prior_ytd = ytd_gross_for_tax - gross_for_tax
         prior_taxable_rounded = math.floor(prior_ytd)
+        prior_period = max(0, tax_period - 1)
         if parsed["is_scottish"]:
-            prior_tax, _ = apply_scottish_bands(prior_taxable_rounded, config)
+            prior_tax, _ = apply_scottish_bands(prior_taxable_rounded, config, prior_period)
         else:
-            prior_tax, _ = apply_england_wales_bands(prior_taxable_rounded, config)
+            prior_tax, _ = apply_england_wales_bands(prior_taxable_rounded, config, prior_period)
 
         tax_this_period = round(ytd_tax - prior_tax, 2)
         return TaxBreakdown(
@@ -422,15 +434,16 @@ def calculate_tax(gross_for_tax: float,
     if code_number is None:
         ytd_taxable_rounded = math.floor(ytd_gross_for_tax)
         if is_scottish:
-            ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config)
+            ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config, tax_period)
         else:
-            ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config)
+            ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config, tax_period)
         prior_ytd = ytd_gross_for_tax - gross_for_tax
         prior_taxable_rounded = math.floor(prior_ytd)
+        prior_period = max(0, tax_period - 1)
         if is_scottish:
-            prior_tax, _ = apply_scottish_bands(prior_taxable_rounded, config)
+            prior_tax, _ = apply_scottish_bands(prior_taxable_rounded, config, prior_period)
         else:
-            prior_tax, _ = apply_england_wales_bands(prior_taxable_rounded, config)
+            prior_tax, _ = apply_england_wales_bands(prior_taxable_rounded, config, prior_period)
         tax_this_period = round(max(0, ytd_tax - prior_tax), 2)
         cap_limit = round(gross_for_tax * 0.50, 2)
         cap_applied = tax_this_period > cap_limit
@@ -482,13 +495,15 @@ def calculate_tax(gross_for_tax: float,
     ytd_taxable_rounded = math.floor(ytd_taxable)
     prior_ytd_taxable_rounded = math.floor(prior_ytd_taxable)
 
-    # Apply tax bands
+    # Apply tax bands — ceiling = monthly value × cumul_period (1 for emergency codes)
+    ytd_cumul_period = 1 if is_emergency else tax_period
+    prior_cumul_period = 0 if is_emergency else max(0, tax_period - 1)
     if is_scottish:
-        ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config)
-        prior_tax, _ = apply_scottish_bands(prior_ytd_taxable_rounded, config)
+        ytd_tax, bands = apply_scottish_bands(ytd_taxable_rounded, config, ytd_cumul_period)
+        prior_tax, _ = apply_scottish_bands(prior_ytd_taxable_rounded, config, prior_cumul_period)
     else:
-        ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config)
-        prior_tax, _ = apply_england_wales_bands(prior_ytd_taxable_rounded, config)
+        ytd_tax, bands = apply_england_wales_bands(ytd_taxable_rounded, config, ytd_cumul_period)
+        prior_tax, _ = apply_england_wales_bands(prior_ytd_taxable_rounded, config, prior_cumul_period)
 
     tax_this_period = round(max(0, ytd_tax - prior_tax), 2)
 
