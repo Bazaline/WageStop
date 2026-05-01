@@ -75,10 +75,12 @@ ELEMENT_KEYWORDS = {
     # --- EMPLOYER COSTS ---
     "E1":  ["employer ni", "er ni", "employer nic", "er nic",
              "employers ni", "employers nic",
-             "employers national insurance", "employer national insurance"],
+             "employers national insurance", "employer national insurance",
+             "ers ni", "ers nic", "ers national insurance"],   # Bamboo: "Ers NIC TP"
     "E3":  ["employer pension", "er pension", "er pen",
              "employers pension", "employer contribution",
-             "employer pension ae", "employer pension non-ae"],
+             "employer pension ae", "employer pension non-ae",
+             "ers pension", "ers pen", "ers contribution"],    # Bamboo: "Ers Pension TP"
 }
 
 # Build reverse lookup: keyword -> element_code
