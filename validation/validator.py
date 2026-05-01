@@ -103,7 +103,9 @@ def detect_tax_week(payment_date_str: str) -> int:
 TAXABLE_ELEMENTS = {
     "A1","A2","A3","A4","A5","A6","A7","A8","A9","A10",
     "A12","A14","A15","A16","A17","A18","A19","A16_OR_A17",
-    "C3",   # RAS pension — gross unchanged
+    # C3 (RAS pension) deliberately excluded — RAS has no effect on gross for tax.
+    # The employee contributes from net pay; the provider reclaims 20% from HMRC.
+    # Neither add nor subtract C3 from gross for tax.
     "D1","D2","D3",  # BIK — taxable but not in net pay
 }
 NON_TAXABLE_ELEMENTS = {"A11","A13"}
