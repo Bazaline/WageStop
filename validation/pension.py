@@ -244,13 +244,16 @@ def calculate_pension(gross_for_tax: float,
 
     expected_er = round(pensionable_pay * er_rate, 2) if er_rate else true_er
 
-    # For RAS: payslip shows 80% (employee pays 80%, provider claims 20%)
+    # For RAS: payslip shows 80% of the gross contribution (provider reclaims 20% from HMRC).
+    # Back-calculate ee_rate from the shown net amount, then round to 4dp to avoid
+    # floating point errors from payroll software rounding causing false TPR failures.
+    # e.g. £2563.33 × 5% × 80% = £102.5332 → shown as £102.53 → raw back-calc = 0.049998
     if pension_type == PensionType.RAS:
-        ee_rate = (ee_contribution_shown / pensionable_pay / 0.80) if pensionable_pay > 0 else 0
+        ee_rate = round((ee_contribution_shown / pensionable_pay / 0.80), 4) if pensionable_pay > 0 else 0
         ee_gross_contribution = round(pensionable_pay * ee_rate, 2)
         ee_expected_shown = round(ee_gross_contribution * 0.80, 2)
     else:
-        ee_rate = (ee_contribution_shown / pensionable_pay) if pensionable_pay > 0 else 0
+        ee_rate = round((ee_contribution_shown / pensionable_pay), 4) if pensionable_pay > 0 else 0
         ee_gross_contribution = ee_contribution_shown
         ee_expected_shown = ee_contribution_shown
 
